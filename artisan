@@ -1,0 +1,31 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Pintasan Artisan
+|--------------------------------------------------------------------------
+|
+| File ini hanya jembatan agar perintah `php artisan ...` tetap bisa
+| dijalankan dari folder root project (project-AlamKu), walaupun aplikasi
+| Laravel berada di subfolder AlamKu.
+|
+*/
+
+$artisan = __DIR__ . DIRECTORY_SEPARATOR . 'AlamKu' . DIRECTORY_SEPARATOR . 'artisan';
+
+if (! is_file($artisan)) {
+    fwrite(STDERR, "File artisan tidak ditemukan di: {$artisan}" . PHP_EOL);
+    exit(1);
+}
+
+chdir(dirname($artisan));
+
+$command = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($artisan);
+
+foreach (array_slice($argv, 1) as $argument) {
+    $command .= ' ' . escapeshellarg($argument);
+}
+
+passthru($command, $exitCode);
+
+exit($exitCode);
