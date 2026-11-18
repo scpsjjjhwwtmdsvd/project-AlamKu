@@ -1,31 +1,18 @@
+#!/usr/bin/env php
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Pintasan Artisan
-|--------------------------------------------------------------------------
-|
-| File ini hanya jembatan agar perintah `php artisan ...` tetap bisa
-| dijalankan dari folder root project (project-AlamKu), walaupun aplikasi
-| Laravel berada di subfolder AlamKu.
-|
-*/
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
 
-$artisan = __DIR__ . DIRECTORY_SEPARATOR . 'AlamKu' . DIRECTORY_SEPARATOR . 'artisan';
+define('LARAVEL_START', microtime(true));
 
-if (! is_file($artisan)) {
-    fwrite(STDERR, "File artisan tidak ditemukan di: {$artisan}" . PHP_EOL);
-    exit(1);
-}
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
 
-chdir(dirname($artisan));
+// Bootstrap Laravel and handle the command...
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
 
-$command = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($artisan);
+$status = $app->handleCommand(new ArgvInput);
 
-foreach (array_slice($argv, 1) as $argument) {
-    $command .= ' ' . escapeshellarg($argument);
-}
-
-passthru($command, $exitCode);
-
-exit($exitCode);
+exit($status);
