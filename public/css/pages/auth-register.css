@@ -1,0 +1,70 @@
+.role-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.role-tab {
+    position: relative;
+    cursor: pointer;
+}
+
+.role-tab input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.role-tab span {
+    display: block;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fdfbf5;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.role-tab strong {
+    display: block;
+    font-size: 12px;
+}
+
+.role-tab small {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.role-tab input:checked + span {
+    border-color: var(--forest-2);
+    background: var(--sage-soft);
+    box-shadow: 0 0 0 3px rgba(31, 90, 63, .08);
+}
+
+.mitra-fields {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.mitra-fields[hidden] {
+    display: none;
+}
+
+.form-section-title {
+    margin: 22px 0 14px;
+}
+
+.form-section-title p {
+    margin: 7px 0 0;
+    color: var(--muted);
+    font-size: 11.5px;
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 560px) {
+    .role-tabs {
+        grid-template-columns: 1fr;
+    }
+}

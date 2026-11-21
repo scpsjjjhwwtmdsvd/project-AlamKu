@@ -1,0 +1,43 @@
+/* ============================================================
+   AlamKu — Ruang Donatur (pengguna)
+   Khusus untuk area /akun/* (layout: layouts/portal.blade.php)
+   Dimuat setelah alamku.css & portal.css.
+   ============================================================ */
+
+body[data-role="donatur"] {
+    --role: #8298a7;
+    --role-deep: #365061;
+    --role-soft: #e5eef3;
+}
+
+.role-chip-donatur {
+    border-color: #cfdde6;
+    background: #e5eef3;
+    color: #365061;
+}
+
+.role-bar-donatur {
+    background: linear-gradient(90deg, #eaf1f5, #f5f2e9);
+}
+
+.portal-hero[data-role="donatur"] {
+    min-height: clamp(540px, 60vh, 640px);
+    align-items: center;
+    background-image:
+        linear-gradient(180deg, rgba(24, 45, 56, .24), rgba(13, 31, 40, .9)),
+        url("https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1800&q=80");
+}
+
+/* Konten tetap rata tengah vertikal; di layar kecil (kolom) tetap rata kiri */
+@media (max-width: 1020px) {
+    .portal-hero[data-role="donatur"] {
+        align-items: flex-start;
+        justify-content: center;
+    }
+}
+
+/* Stats sedikit lebih kecil dari hero (menyamakan pola .stats-strip beranda) */
+.portal-stats {
+    max-width: 1160px;
+    margin: -34px auto 0;
+}

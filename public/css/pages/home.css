@@ -1,0 +1,273 @@
+/* ============================================================
+   AlamKu — Beranda publik
+   Khusus untuk resources/views/home.blade.php
+   Dimuat setelah alamku.css & portal.css, jadi aturan di sini menang.
+   ============================================================ */
+
+/* ---------- Landing hero ---------- */
+
+.hero {
+    position: relative;
+    isolation: isolate;
+    min-height: calc(100vh - 96px);
+    min-height: max(620px, calc(100svh - 96px));
+    max-width: none;
+    margin: 16px 16px 0;
+    border-radius: 32px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background:
+        radial-gradient(circle at 75% 20%, rgba(89, 132, 100, .55), transparent 45%),
+        linear-gradient(150deg, #1d4a34, #0c2418 70%);
+    color: #fff;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* opacity: .80; */
+    filter: saturate(.88);
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+        linear-gradient(180deg, rgba(9, 26, 18, .15) 0%, rgba(9, 26, 18, .35) 42%, rgba(9, 26, 18, .82) 100%);
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: clamp(28px, 5vw, 64px);
+    text-align: center;
+}
+
+.hero-title {
+    margin: 24px 0 10px;
+    font-family: var(--font-display);
+    font-size: clamp(4.0rem, 8vw, 12rem);
+    font-weight: 900;
+    line-height: .78;
+    letter-spacing: -.065em;
+    text-transform: none;
+    text-shadow: 0 10px 50px rgba(0, 0, 0, .28);
+}
+
+.hero-sub {
+    max-width: 900px;
+    margin: 0 auto 26px;
+    color: rgba(255, 255, 255, .86);
+    font-size: clamp(13.5px, 1.5vw, 16.5px);
+    line-height: 1.65;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+
+/* ---------- Split / features ---------- */
+
+.split {
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 56px;
+    align-items: center;
+}
+
+.split .lead {
+    margin: 20px 0 0;
+    max-width: 520px;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.75;
+}
+
+.mini-stats {
+    display: flex;
+    gap: 34px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.mini-stat strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--forest);
+}
+
+.mini-stat span {
+    color: var(--muted);
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.feature-stack {
+    display: grid;
+    gap: 12px;
+}
+
+.feature-panel {
+    display: flex;
+    gap: 16px;
+    padding: 22px;
+    border: 1px solid rgba(16, 35, 26, .08);
+    border-radius: 20px;
+    background: var(--slate);
+    color: #12231b;
+}
+
+.feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    background: rgba(16, 35, 26, .12);
+}
+
+.feature-panel h3 {
+    margin: 1px 0 4px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.feature-panel p {
+    margin: 0;
+    color: #31463c;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+
+/* ---------- Role portal cards on landing ---------- */
+
+.role-portal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.role-portal-card {
+    display: flex;
+    flex-direction: column;
+    padding: 26px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: var(--paper);
+}
+
+.role-portal-donatur {
+    background: linear-gradient(180deg, #f2f7f9, var(--paper) 45%);
+}
+
+.role-portal-mitra {
+    background: linear-gradient(180deg, #eef4e8, var(--paper) 45%);
+}
+
+.role-portal-admin {
+    background: linear-gradient(180deg, #faf4e6, var(--paper) 45%);
+}
+
+.role-portal-card h3 {
+    margin: 16px 0 8px;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -.025em;
+}
+
+.role-portal-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.role-portal-card ul {
+    display: grid;
+    gap: 7px;
+    margin: 16px 0 20px;
+    padding: 0;
+    color: #405247;
+    font-size: 11px;
+    list-style: none;
+}
+
+.role-portal-card li {
+    position: relative;
+    padding-left: 16px;
+}
+
+.role-portal-card li::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--moss);
+}
+
+.role-portal-card .btn {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1020px) {
+    .role-portal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 980px) {
+    .split {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+}
+
+@media (max-width: 820px) {
+    .hero {
+        min-height: max(560px, calc(100svh - 135px));
+        margin: 16px 16px 0;
+        border-radius: 28px;
+    }
+
+    .role-portal-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .hero-title {
+        font-size: clamp(4rem, 22vw, 7rem);
+    }
+
+    .hero-inner {
+        padding: 28px 18px;
+    }
+}
