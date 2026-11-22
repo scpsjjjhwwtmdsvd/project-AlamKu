@@ -15,7 +15,7 @@
 <body class="auth-body">
     <header class="site-header">
         <div class="header-inner">
-            <a class="logo" href="{{ route('home') }}" aria-label="AlamKu — beranda">
+            <a class="logo" href="{{ route('home') }}" aria-label="AlamKu: beranda">
                 <span class="logo-mark" aria-hidden="true">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                         <path d="M12 21c0-6 1.5-11 8-15-1 8-4 12-8 15Z" fill="currentColor" opacity=".9"/>
@@ -40,7 +40,9 @@
         <div class="auth-flash alert error">{{ session('error') }}</div>
     @endif
 
-    @yield('content')
+    <main>
+        @yield('content')
+    </main>
 
     @stack('scripts')
 </body>

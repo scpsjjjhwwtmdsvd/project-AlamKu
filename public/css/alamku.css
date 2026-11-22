@@ -16,7 +16,7 @@
     --slate: #aebfca;
     --slate-deep: #8298a7;
     --gold: #d9b36c;
-    --muted: #66756b;
+    --muted: #56665c;
     --danger: #9f2d2d;
     --shadow: 0 24px 60px rgba(18, 43, 31, .1);
     --font-display: "Poppins", "Segoe UI", system-ui, sans-serif;
@@ -1361,5 +1361,36 @@ textarea {
 @media (max-width: 1100px) {
     .user-chip-name {
         display: none;
+    }
+}
+
+/* ---------- Accessibility polish ---------- */
+
+:where(a, button, summary, [tabindex]):focus-visible {
+    outline: 2.5px solid var(--forest-2);
+    outline-offset: 3px;
+}
+
+summary {
+    cursor: pointer;
+}
+
+.form-group input::placeholder,
+textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
     }
 }

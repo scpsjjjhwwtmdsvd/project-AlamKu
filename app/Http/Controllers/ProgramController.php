@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PesananAdopsi;
 use App\Models\Pohon;
 use App\Models\Proyek;
+use App\Support\AdoptionPackage;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -68,6 +69,42 @@ class ProgramController extends Controller
             ->take(3)
             ->get();
 
-        return view('program.show', compact('proyek', 'remaining', 'percent', 'trees', 'reports', 'myOrder', 'related'));
+        $packages = AdoptionPackage::all();
+
+        foreach ($packages as $key => $package) {
+            $packages[$key]['available'] = $package['trees'] <= $remaining;
+        }
+
+        $availablePackages = array_filter($packages, static fn (array $package): bool => $package['available']);
+        $canAdopt = $proyek->status === 'aktif' && $availablePackages !== [];
+        $defaultPackage = $availablePackages === []
+            ? $packages['starter']
+            : reset($availablePackages);
+
+        $selectedPackage = (string) old('paket', $defaultPackage['key']);
+
+        if (! isset($packages[$selectedPackage]) || ! $packages[$selectedPackage]['available']) {
+            $selectedPackage = $defaultPackage['key'];
+        }
+
+        $adoptData = [
+            'packages' => array_values($packages),
+            'allocations' => AdoptionPackage::allocationRules(),
+            'default' => $defaultPackage['key'],
+        ];
+
+        return view('program.show', compact(
+            'proyek',
+            'remaining',
+            'percent',
+            'trees',
+            'reports',
+            'myOrder',
+            'related',
+            'packages',
+            'canAdopt',
+            'selectedPackage',
+            'adoptData',
+        ));
     }
 }

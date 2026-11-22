@@ -723,6 +723,75 @@ body[data-role="admin"] {
     text-align: right;
 }
 
+/* ---------- Transparansi dana ---------- */
+
+.fund-list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.fund-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee8db;
+}
+
+.fund-list li:last-child {
+    border-bottom: 0;
+}
+
+.fund-label {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.fund-percent {
+    color: var(--muted);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.fund-amount {
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.fund-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+}
+
+.fund-foot span {
+    color: var(--muted);
+}
+
+.fund-foot strong {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.fund-note {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+}
+
 /* ---------- Admin modules ---------- */
 
 .admin-module-grid {

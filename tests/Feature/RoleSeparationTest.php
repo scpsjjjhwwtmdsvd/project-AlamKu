@@ -102,7 +102,7 @@ class RoleSeparationTest extends TestCase
             ->assertOk();
     }
 
-    public function test_donatur_can_adopt_bibit_and_reserve_quota(): void
+    public function test_donatur_can_adopt_package_and_reserve_quota(): void
     {
         $donatur = $this->user('donatur@alamku.test');
 
@@ -114,24 +114,30 @@ class RoleSeparationTest extends TestCase
         $before = (int) $project->bibit_dipesan;
 
         $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
-            'jumlah_bibit' => 2,
+            'paket' => 'starter',
         ]);
 
         $response->assertRedirect();
+        $response->assertSessionHas('payment_success');
 
         $this->assertDatabaseHas('pesanan_adopsi', [
             'donatur_id' => $donatur->id,
             'proyek_id' => $project->id,
             'jumlah_bibit' => 2,
-            'harga_per_bibit' => $project->biaya_per_bibit,
-            'total_bayar' => $project->biaya_per_bibit * 2,
-            'status' => 'menunggu_pembayaran',
+            'harga_per_bibit' => 25000,
+            'total_bayar' => 50000,
+            'status' => 'terkonfirmasi',
+        ]);
+
+        $this->assertDatabaseHas('pembayaran', [
+            'jumlah' => 50000,
+            'status' => 'berhasil',
         ]);
 
         $this->assertSame($before + 2, (int) $project->fresh()->bibit_dipesan);
     }
 
-    public function test_adoption_rejects_quantity_above_remaining_quota(): void
+    public function test_adoption_requires_a_known_package(): void
     {
         $donatur = $this->user('donatur@alamku.test');
 
@@ -140,18 +146,34 @@ class RoleSeparationTest extends TestCase
             ->whereColumn('bibit_dipesan', '<', 'kuota_bibit')
             ->firstOrFail();
 
-        $remaining = (int) $project->kuota_bibit - (int) $project->bibit_dipesan;
-
         $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
-            'jumlah_bibit' => $remaining + 1,
+            'paket' => 'custom',
         ]);
 
-        $response->assertSessionHasErrors('jumlah_bibit');
+        $response->assertSessionHasErrors('paket');
+    }
+
+    public function test_adoption_rejects_package_above_remaining_quota(): void
+    {
+        $donatur = $this->user('donatur@alamku.test');
+
+        $project = Proyek::query()
+            ->where('status', 'aktif')
+            ->whereColumn('bibit_dipesan', '<', 'kuota_bibit')
+            ->firstOrFail();
+
+        $project->forceFill(['bibit_dipesan' => $project->kuota_bibit - 1])->save();
+
+        $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
+            'paket' => 'starter',
+        ]);
+
+        $response->assertSessionHasErrors('paket');
 
         $this->assertDatabaseMissing('pesanan_adopsi', [
             'donatur_id' => $donatur->id,
             'proyek_id' => $project->id,
-            'jumlah_bibit' => $remaining + 1,
+            'jumlah_bibit' => 2,
         ]);
     }
 }

@@ -43,7 +43,7 @@
 <body class="portal" data-role="admin">
     <header class="site-header">
         <div class="header-inner">
-            <a class="logo" href="{{ route('admin.dashboard') }}" aria-label="AlamKu — Konsol Admin">
+            <a class="logo" href="{{ route('admin.dashboard') }}" aria-label="AlamKu: Konsol Admin">
                 <span class="logo-mark" aria-hidden="true">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                         <path d="M12 21c0-6 1.5-11 8-15-1 8-4 12-8 15Z" fill="currentColor" opacity=".9"/>
@@ -131,6 +131,7 @@
         <div>&copy; {{ date('Y') }} AlamKu. Tumbuh bersama.</div>
     </footer>
 
+    <script src="{{ asset('js/user-menu.js') }}" defer></script>
     @stack('scripts')
 </body>
 </html>

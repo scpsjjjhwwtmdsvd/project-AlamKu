@@ -97,6 +97,11 @@
     font-size: 12.5px;
 }
 
+.program-search-row input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
 .program-search-row input:focus {
     outline: none;
     border-color: #fff;

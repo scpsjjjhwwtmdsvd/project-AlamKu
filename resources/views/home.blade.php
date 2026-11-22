@@ -20,6 +20,7 @@
             class="hero-bg"
             src="{{ asset('images/hero-mountain.jpg') }}"
             alt="Gunung dengan puncak bergerigi dan padang hijau di kaki lerengnya"
+            fetchpriority="high"
         >
         <div class="hero-inner">
             <h1 class="hero-title">AlamKu</h1>
@@ -211,7 +212,7 @@
             <div class="step-card">
                 <span>02</span>
                 <h3>Adopsi bibit</h3>
-                <p>Tentukan jumlah bibit. Pesanan tersimpan di ruang donatur beserta batas pembayarannya.</p>
+                <p>Pilih paket adopsi. Pesanan tersimpan di ruang donatur beserta rincian pembayarannya.</p>
             </div>
             <div class="step-card">
                 <span>03</span>

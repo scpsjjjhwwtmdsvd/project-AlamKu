@@ -217,6 +217,13 @@
     text-transform: uppercase;
 }
 
+.adopt-price-note {
+    margin: -6px 0 0;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
 .adopt-progress-meta {
     display: flex;
     justify-content: space-between;
@@ -232,9 +239,15 @@
     border-top: 1px solid var(--line);
 }
 
-.adopt-form label {
-    display: block;
-    margin-bottom: 6px;
+.package-group {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.package-group legend {
+    padding: 0;
+    margin-bottom: 8px;
     color: #526257;
     font-size: 8.5px;
     font-weight: 800;
@@ -242,25 +255,88 @@
     text-transform: uppercase;
 }
 
-.adopt-input-row {
-    display: flex;
-    align-items: center;
+.package-list {
+    display: grid;
     gap: 8px;
 }
 
-.adopt-input-row input {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1px solid var(--line);
-    border-radius: 11px;
-    background: #fdfbf5;
-    color: var(--ink);
-    font-size: 13px;
+.package-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
 }
 
-.adopt-input-row > span {
+.package-option.is-unavailable {
+    cursor: not-allowed;
+}
+
+.package-option input {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin: 13px 0 0;
+    accent-color: var(--forest-2);
+    cursor: pointer;
+}
+
+.package-option input:disabled {
+    cursor: not-allowed;
+}
+
+.package-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fdfbf5;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.package-copy {
+    display: grid;
+    gap: 1px;
+}
+
+.package-copy strong {
+    font-size: 12.5px;
+}
+
+.package-copy small {
     color: var(--muted);
-    font-size: 11px;
+    font-size: 10px;
+}
+
+.package-copy .package-unavailable {
+    color: #6f4a16;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.package-price {
+    color: var(--forest);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.package-option input:checked + .package-card {
+    border-color: var(--forest-2);
+    background: var(--sage-soft);
+    box-shadow: 0 0 0 3px rgba(31, 90, 63, .08);
+}
+
+.package-option input:focus-visible + .package-card {
+    outline: 2.5px solid var(--forest-2);
+    outline-offset: 2px;
+}
+
+.package-option input:disabled + .package-card {
+    opacity: .55;
 }
 
 .adopt-total {
@@ -278,6 +354,10 @@
 .adopt-total strong {
     color: var(--ink);
     font-size: 15px;
+}
+
+.adopt-submit {
+    width: 100%;
 }
 
 .adopt-order-note {
@@ -335,6 +415,116 @@
     color: var(--muted);
     font-size: 10px;
     line-height: 1.6;
+}
+
+
+/* ---------- Transparansi dana di kartu adopsi ---------- */
+
+.fund-disclosure {
+    margin-top: 16px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #faf7ee;
+}
+
+.fund-disclosure summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    list-style: none;
+}
+
+.fund-disclosure summary::-webkit-details-marker {
+    display: none;
+}
+
+.fund-disclosure-hint {
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.fund-disclosure[open] .fund-disclosure-hint {
+    color: var(--forest-2);
+}
+
+.fund-disclosure-body {
+    padding: 0 14px 14px;
+}
+
+.fund-disclosure-body > p {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+
+/* ---------- Status pemrosesan pembayaran ---------- */
+
+.pay-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(16, 37, 27, .55);
+    backdrop-filter: blur(6px);
+}
+
+.pay-overlay[hidden] {
+    display: none;
+}
+
+.pay-overlay-card {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    width: min(340px, 100%);
+    padding: 28px;
+    border-radius: 20px;
+    background: var(--paper);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .25);
+    text-align: center;
+}
+
+.pay-overlay-card strong {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -.02em;
+}
+
+.pay-overlay-card > span:not(.pay-spinner) {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.pay-overlay-card small {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.pay-spinner {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 4px;
+    border: 3px solid var(--sage);
+    border-top-color: var(--forest-2);
+    border-radius: 50%;
+    animation: pay-spin .8s linear infinite;
+}
+
+@keyframes pay-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 

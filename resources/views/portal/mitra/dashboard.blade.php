@@ -52,7 +52,7 @@
                     </div>
                 </div>
             @else
-                <strong class="impact-number">—</strong>
+                <strong class="impact-number">-</strong>
                 <span class="impact-caption">profil kelompok belum lengkap</span>
                 <div class="impact-split">
                     <div>

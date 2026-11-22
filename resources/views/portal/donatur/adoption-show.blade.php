@@ -5,6 +5,9 @@
 @section('content')
     @php
         $project = $order->proyek;
+        $paymentSuccess = session('payment_success');
+        $package = \App\Support\AdoptionPackage::match((int) $order->jumlah_bibit, (int) $order->total_bayar);
+        $allocation = \App\Support\AdoptionPackage::allocation((int) $order->total_bayar);
     @endphp
 
     <section class="portal-hero portal-hero-slim" data-role="donatur">
@@ -24,6 +27,43 @@
         </div>
     </section>
 
+    @if ($paymentSuccess)
+        <section class="pay-success" role="status" aria-labelledby="pay-success-title">
+            <span class="pay-success-mark" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="m5 12.5 4.5 4.5L19 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <div class="pay-success-copy">
+                <h2 id="pay-success-title">Pembayaran berhasil.</h2>
+                <p>
+                    Paket {{ $paymentSuccess['package'] }} untuk {{ $project?->judul ?? 'program konservasi' }}
+                    sudah dikonfirmasi otomatis pada mode demo.
+                </p>
+                <div class="pay-success-meta">
+                    <div><span>Kode pesanan</span><strong>{{ $paymentSuccess['kode_pesanan'] }}</strong></div>
+                    <div><span>Bibit</span><strong>{{ number_format($paymentSuccess['trees'], 0, ',', '.') }} bibit</strong></div>
+                    <div><span>Dibayar</span><strong>Rp {{ number_format($paymentSuccess['total'], 0, ',', '.') }}</strong></div>
+                    <div><span>Status</span><strong>Terkonfirmasi</strong></div>
+                </div>
+            </div>
+            <div class="pay-success-fund">
+                <div class="pay-success-fund-head">
+                    <h3>Transparansi dana</h3>
+                    <strong>Rp {{ number_format($paymentSuccess['total'], 0, ',', '.') }}</strong>
+                </div>
+                @include('portal.donatur.partials.fund-allocation', [
+                    'allocation' => $paymentSuccess['allocation'],
+                    'total' => $paymentSuccess['total'],
+                ])
+                <p class="fund-note">
+                    Mode demo: pembayaran disimulasikan, tidak ada dana nyata yang ditarik.
+                    Alokasi di atas adalah rencana penggunaan dana untuk transaksi ini.
+                </p>
+            </div>
+        </section>
+    @endif
+
     <div class="detail-layout">
         <div class="detail-stack">
             <div class="data-card">
@@ -35,7 +75,8 @@
                         <tr><th>Kelompok tani</th><td>{{ $project?->kelompokTani?->nama_kelompok ?? '-' }}</td></tr>
                         <tr><th>Jenis pohon</th><td>{{ $project?->jenisPohon?->nama_lokal ?? '-' }}</td></tr>
                         <tr><th>Jumlah bibit</th><td>{{ number_format($order->jumlah_bibit, 0, ',', '.') }} bibit</td></tr>
-                        <tr><th>Harga per bibit</th><td>Rp {{ number_format($order->harga_per_bibit, 0, ',', '.') }}</td></tr>
+                        <tr><th>Paket</th><td>{{ $package['name'] ?? 'Adopsi bibit' }}</td></tr>
+                        <tr><th>Harga per bibit (setara)</th><td>Rp {{ number_format($order->harga_per_bibit, 0, ',', '.') }}</td></tr>
                         <tr><th>Total bayar</th><td><strong>Rp {{ number_format($order->total_bayar, 0, ',', '.') }}</strong></td></tr>
                         <tr><th>Status</th><td><span class="status-badge status-{{ $order->status }}">{{ \Illuminate\Support\Str::headline($order->status) }}</span></td></tr>
                         <tr><th>Batas bayar</th><td>{{ $order->batas_bayar?->format('d M Y H:i') ?? '-' }}</td></tr>
@@ -62,6 +103,22 @@
                     </p>
                 </div>
             @endif
+
+            @unless ($paymentSuccess)
+                <div class="panel fund-panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Transparansi dana</h2>
+                            <p>Rencana pembagian Rp {{ number_format($order->total_bayar, 0, ',', '.') }} untuk adopsi ini.</p>
+                        </div>
+                    </div>
+                    @include('portal.donatur.partials.fund-allocation', [
+                        'allocation' => $allocation,
+                        'total' => (int) $order->total_bayar,
+                    ])
+                    <p class="fund-note">Alokasi ini menjadi acuan penggunaan dana setelah pembayaran dikonfirmasi.</p>
+                </div>
+            @endunless
 
             <div class="panel">
                 <div class="panel-head">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PesananAdopsi;
 use App\Models\Pohon;
 use App\Models\Proyek;
+use App\Support\AdoptionPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -96,27 +97,30 @@ class DonaturController extends Controller
     public function storeAdoption(Request $request, Proyek $proyek): RedirectResponse
     {
         $data = $request->validate([
-            'jumlah_bibit' => ['required', 'integer', 'min:1'],
+            'paket' => ['required', 'string', Rule::in(array_keys(AdoptionPackage::all()))],
         ], [], [
-            'jumlah_bibit' => 'jumlah bibit',
+            'paket' => 'paket adopsi',
         ]);
 
-        $remaining = max(0, (int) $proyek->kuota_bibit - (int) $proyek->bibit_dipesan);
+        $package = AdoptionPackage::find($data['paket']);
 
-        if ($proyek->status !== 'aktif' || $remaining < 1) {
-            return back()->with('error', 'Program ini sedang tidak menerima adopsi baru.');
-        }
-
-        if ((int) $data['jumlah_bibit'] > $remaining) {
+        if ($package === null) {
             throw ValidationException::withMessages([
-                'jumlah_bibit' => 'Sisa kuota program ini hanya '.number_format($remaining, 0, ',', '.').' bibit.',
+                'paket' => 'Paket adopsi tidak dikenali.',
             ]);
         }
 
-        $order = DB::transaction(function () use ($request, $proyek, $data): PesananAdopsi {
-            $jumlahBibit = (int) $data['jumlah_bibit'];
-            $hargaPerBibit = (int) $proyek->biaya_per_bibit;
+        $remaining = max(0, (int) $proyek->kuota_bibit - (int) $proyek->bibit_dipesan);
 
+        if ($proyek->status !== 'aktif' || $remaining < $package['trees']) {
+            throw ValidationException::withMessages([
+                'paket' => $remaining < 1
+                    ? 'Program ini sedang tidak menerima adopsi baru.'
+                    : 'Sisa kuota program ini hanya '.number_format($remaining, 0, ',', '.').' bibit. Pilih paket yang lebih kecil.',
+            ]);
+        }
+
+        $order = DB::transaction(function () use ($request, $proyek, $package): PesananAdopsi {
             do {
                 $kodePesanan = 'ADP-'.now()->format('Ymd').'-'.Str::upper(Str::random(6));
             } while (PesananAdopsi::query()->where('kode_pesanan', $kodePesanan)->exists());
@@ -125,14 +129,30 @@ class DonaturController extends Controller
                 'kode_pesanan' => $kodePesanan,
                 'donatur_id' => $request->user()->id,
                 'proyek_id' => $proyek->id,
-                'jumlah_bibit' => $jumlahBibit,
-                'harga_per_bibit' => $hargaPerBibit,
-                'total_bayar' => $jumlahBibit * $hargaPerBibit,
-                'status' => 'menunggu_pembayaran',
+                'jumlah_bibit' => $package['trees'],
+                'harga_per_bibit' => intdiv($package['price'], $package['trees']),
+                'total_bayar' => $package['price'],
+                'status' => 'terkonfirmasi',
                 'batas_bayar' => now()->addDay(),
+                'dikonfirmasi_pada' => now(),
             ]);
 
-            $proyek->increment('bibit_dipesan', $jumlahBibit);
+            $order->pembayaran()->create([
+                'metode' => 'qris',
+                'penyedia' => 'Simulasi AlamKu',
+                'referensi_penyedia' => 'SIM-'.$order->kode_pesanan,
+                'jumlah' => $package['price'],
+                'status' => 'berhasil',
+                'dibayar_pada' => now(),
+                'data_respons_gateway' => [
+                    'mode' => 'demo',
+                    'paket' => $package['key'],
+                    'jumlah_bibit' => $package['trees'],
+                    'alokasi' => AdoptionPackage::allocation($package['price']),
+                ],
+            ]);
+
+            $proyek->increment('bibit_dipesan', $package['trees']);
             $proyek->refresh();
 
             if ((int) $proyek->bibit_dipesan >= (int) $proyek->kuota_bibit) {
@@ -145,7 +165,14 @@ class DonaturController extends Controller
 
         return redirect()
             ->route('akun.adoptions.show', $order->id)
-            ->with('success', 'Adopsi berhasil dibuat. Selesaikan pembayaran sebelum batas waktu.');
+            ->with('payment_success', [
+                'kode_pesanan' => $order->kode_pesanan,
+                'package' => $package['name'],
+                'trees' => $package['trees'],
+                'total' => $package['price'],
+                'allocation' => AdoptionPackage::allocation($package['price']),
+                'demo' => true,
+            ]);
     }
 
     public function profile(Request $request): View

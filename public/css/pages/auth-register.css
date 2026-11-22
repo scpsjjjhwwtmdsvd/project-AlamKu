@@ -40,6 +40,11 @@
     box-shadow: 0 0 0 3px rgba(31, 90, 63, .08);
 }
 
+.role-tab input:focus-visible + span {
+    outline: 2.5px solid var(--forest-2);
+    outline-offset: 3px;
+}
+
 .mitra-fields {
     margin-top: 20px;
     padding-top: 18px;

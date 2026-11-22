@@ -16,6 +16,7 @@
             'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
             'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1200&q=80',
         ];
+        $minimumAdoption = \App\Support\AdoptionPackage::MINIMUM_TRANSACTION;
     @endphp
 
     <section class="page-hero">
@@ -23,6 +24,7 @@
             class="page-hero-bg"
             src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2200&q=80"
             alt="Hutan hijau dengan cahaya pagi"
+            fetchpriority="high"
         >
         <div class="page-hero-inner">
             <h1 class="display">Pilih pohon.<br><em>Ikuti ceritanya.</em></h1>
@@ -66,7 +68,7 @@
                 <h2 class="display">Program yang bisa <em>didukung</em>.</h2>
             </div>
             <p>
-                Pilih program, tentukan jumlah bibit, lalu ikuti kabar pohon
+                Pilih program, pilih paket adopsi, lalu ikuti kabar pohon
                 melalui laporan lapangan dan foto geotag.
             </p>
         </div>
@@ -104,7 +106,7 @@
                             </div>
                             <small>
                                 {{ number_format($project->bibit_dipesan, 0, ',', '.') }} / {{ number_format($project->kuota_bibit, 0, ',', '.') }} bibit diadopsi
-                                &middot; Rp {{ number_format($project->biaya_per_bibit, 0, ',', '.') }} / bibit
+                                &middot; paket mulai Rp {{ number_format($minimumAdoption, 0, ',', '.') }}
                             </small>
                         </div>
                     </a>
@@ -129,7 +131,7 @@
             <div class="step-card">
                 <span>02</span>
                 <h3>Adopsi bibit</h3>
-                <p>Tentukan jumlah bibit. Pesanan akan tersimpan di ruang donatur beserta batas pembayaran.</p>
+                <p>Pilih paket adopsi. Pesanan akan tersimpan di ruang donatur beserta rincian pembayaran dan alokasi dana.</p>
             </div>
             <div class="step-card">
                 <span>03</span>

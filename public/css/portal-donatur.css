@@ -41,3 +41,109 @@ body[data-role="donatur"] {
     max-width: 1160px;
     margin: -34px auto 0;
 }
+
+/* ---------- Pembayaran berhasil ---------- */
+
+.pay-success {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 18px;
+    margin-bottom: 18px;
+    padding: clamp(20px, 3vw, 28px);
+    border: 1px solid #cfe3c7;
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(201, 220, 198, .55), transparent 45%),
+        var(--paper);
+}
+
+.pay-success-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--forest-2);
+    color: #fff;
+}
+
+.pay-success-copy {
+    min-width: 0;
+}
+
+.pay-success-copy h2 {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -.035em;
+}
+
+.pay-success-copy > p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.7;
+}
+
+.pay-success-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.pay-success-meta div {
+    display: grid;
+    gap: 2px;
+}
+
+.pay-success-meta span {
+    color: var(--muted);
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.pay-success-meta strong {
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.pay-success-fund {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.pay-success-fund-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.pay-success-fund-head h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -.02em;
+}
+
+.pay-success-fund-head strong {
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+    .pay-success {
+        grid-template-columns: 1fr;
+    }
+}

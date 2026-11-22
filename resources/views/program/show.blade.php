@@ -17,11 +17,10 @@
             'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=2200&q=80',
         ];
         $image = $projectImages[$proyek->id % count($projectImages)];
-        $isOpen = $proyek->status === 'aktif' && $remaining > 0;
     @endphp
 
     <section class="program-detail-hero">
-        <img class="program-detail-bg" src="{{ $image }}" alt="">
+        <img class="program-detail-bg" src="{{ $image }}" alt="" fetchpriority="high">
         <div class="program-detail-inner">
             <a class="back-link" href="{{ route('program.index') }}">&larr; Semua program</a>
             <span class="pill">{{ ucfirst(str_replace('_', ' ', $proyek->status)) }}</span>
@@ -87,9 +86,10 @@
 
             <aside class="adopt-card">
                 <div class="adopt-price">
-                    Rp {{ number_format($proyek->biaya_per_bibit, 0, ',', '.') }}
-                    <span>/ bibit</span>
+                    Rp {{ number_format(\App\Support\AdoptionPackage::MINIMUM_TRANSACTION, 0, ',', '.') }}
+                    <span>minimum transaksi</span>
                 </div>
+                <p class="adopt-price-note">Harga paket, bukan harga satu bibit.</p>
 
                 <div class="adopt-progress">
                     <div class="progress" aria-hidden="true">
@@ -111,43 +111,69 @@
 
                 @auth
                     @if (auth()->user()->role === 'donatur')
-                        @if ($isOpen)
+                        @if ($canAdopt)
                             <form
                                 class="adopt-form"
                                 method="POST"
                                 action="{{ route('program.adopt', $proyek) }}"
                                 data-adopt-form
-                                data-price="{{ (int) $proyek->biaya_per_bibit }}"
                             >
                                 @csrf
-                                <label for="jumlah_bibit">Jumlah bibit</label>
-                                <div class="adopt-input-row">
-                                    <input
-                                        id="jumlah_bibit"
-                                        type="number"
-                                        name="jumlah_bibit"
-                                        min="1"
-                                        max="{{ $remaining }}"
-                                        value="{{ old('jumlah_bibit', 1) }}"
-                                        data-adopt-qty
-                                    >
-                                    <span>bibit</span>
-                                </div>
-                                @error('jumlah_bibit')
+
+                                <fieldset class="package-group">
+                                    <legend>Pilih paket adopsi</legend>
+                                    <div class="package-list">
+                                        @foreach ($packages as $package)
+                                            <label class="package-option {{ $package['available'] ? '' : 'is-unavailable' }}">
+                                                <input
+                                                    type="radio"
+                                                    name="paket"
+                                                    value="{{ $package['key'] }}"
+                                                    required
+                                                    @checked($package['key'] === $selectedPackage)
+                                                    @disabled(! $package['available'])
+                                                >
+                                                <span class="package-card">
+                                                    <span class="package-copy">
+                                                        <strong>{{ $package['name'] }}</strong>
+                                                        <small>{{ number_format($package['trees'], 0, ',', '.') }} bibit</small>
+                                                        @unless ($package['available'])
+                                                            <small class="package-unavailable">Kuota tersisa tidak cukup</small>
+                                                        @endunless
+                                                    </span>
+                                                    <span class="package-price">Rp {{ number_format($package['price'], 0, ',', '.') }}</span>
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </fieldset>
+
+                                @error('paket')
                                     <div class="error">{{ $message }}</div>
                                 @enderror
 
                                 <div class="adopt-total">
-                                    <span>Total adopsi</span>
-                                    <strong data-adopt-total>Rp {{ number_format($proyek->biaya_per_bibit, 0, ',', '.') }}</strong>
+                                    <span>Total bayar</span>
+                                    <strong data-adopt-total>Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</strong>
                                 </div>
 
-                                <button class="btn btn-dark btn-lg" type="submit" style="width:100%">Adopsi sekarang</button>
+                                <button class="btn btn-dark btn-lg adopt-submit" type="submit" data-adopt-submit>
+                                    <span data-adopt-submit-label>Bayar Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</span>
+                                </button>
+
+                                <div class="pay-overlay" data-pay-overlay hidden role="status" aria-live="polite" tabindex="-1">
+                                    <div class="pay-overlay-card">
+                                        <span class="pay-spinner" aria-hidden="true"></span>
+                                        <strong>Memproses pembayaran</strong>
+                                        <span data-pay-summary>{{ $packages[$selectedPackage]['name'] }} &middot; {{ $packages[$selectedPackage]['trees'] }} bibit &middot; Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</span>
+                                        <small>Jangan tutup halaman ini.</small>
+                                    </div>
+                                </div>
                             </form>
                         @else
                             <div class="adopt-closed">
                                 <strong>Adopsi ditutup.</strong>
-                                <span>Program ini sudah penuh atau tidak aktif. Jelajahi program lain yang masih tersedia.</span>
+                                <span>Program ini sudah penuh atau sisa kuotanya tidak cukup untuk satu paket.</span>
                                 <a class="btn" href="{{ route('program.index') }}">Lihat program lain</a>
                             </div>
                         @endif
@@ -169,10 +195,35 @@
                     </div>
                 @endauth
 
+                <details class="fund-disclosure">
+                    <summary>
+                        <span>Transparansi dana</span>
+                        <span class="fund-disclosure-hint">Lihat rincian</span>
+                    </summary>
+                    <div class="fund-disclosure-body">
+                        <p>Angka mengikuti paket yang dipilih.</p>
+                        <ul class="fund-list" data-fund-breakdown>
+                            @foreach (\App\Support\AdoptionPackage::allocation($packages[$selectedPackage]['price']) as $item)
+                                <li data-fund-row data-percent="{{ $item['percent'] }}">
+                                    <span class="fund-label">{{ $item['label'] }}</span>
+                                    <span class="fund-percent">{{ $item['percent'] }}%</span>
+                                    <strong class="fund-amount" data-fund-amount>Rp {{ number_format($item['amount'], 0, ',', '.') }}</strong>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <div class="fund-foot">
+                            <span>Total</span>
+                            <strong><span data-fund-total>Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</span> &middot; 100%</strong>
+                        </div>
+                    </div>
+                </details>
+
                 <div class="adopt-note">
-                    Pembayaran diverifikasi admin. Setelah dikonfirmasi, bibit akan
-                    dipetakan ke kode pohon dan laporan lapangan.
+                    Mode demo: pembayaran disimulasikan dan langsung dikonfirmasi.
+                    Setelah itu bibit dipetakan ke kode pohon dan laporan lapangan.
                 </div>
+
+                <script type="application/json" data-adopt-data>@json($adoptData)</script>
             </aside>
         </div>
     </section>
@@ -207,7 +258,7 @@
                             <div class="progress" aria-hidden="true">
                                 <span @style(['width: ' . $relatedPercent . '%'])></span>
                             </div>
-                            <small>Rp {{ number_format($project->biaya_per_bibit, 0, ',', '.') }} / bibit</small>
+                            <small>Paket mulai Rp {{ number_format(\App\Support\AdoptionPackage::MINIMUM_TRANSACTION, 0, ',', '.') }}</small>
                         </div>
                     </a>
                 @endforeach
@@ -217,24 +268,5 @@
 @endsection
 
 @push('scripts')
-    <script>
-        (() => {
-            const form = document.querySelector('[data-adopt-form]');
-            if (!form) return;
-
-            const input = form.querySelector('[data-adopt-qty]');
-            const output = form.querySelector('[data-adopt-total]');
-            const price = Number(form.dataset.price || 0);
-
-            const format = (value) => 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
-
-            const sync = () => {
-                const quantity = Math.max(0, Number(input.value || 0));
-                output.textContent = format(quantity * price);
-            };
-
-            input.addEventListener('input', sync);
-            sync();
-        })();
-    </script>
+    <script src="{{ asset('js/adoption.js') }}" defer></script>
 @endpush
