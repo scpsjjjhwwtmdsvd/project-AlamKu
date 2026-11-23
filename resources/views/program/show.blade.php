@@ -157,9 +157,154 @@
                                     <strong data-adopt-total>Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</strong>
                                 </div>
 
-                                <button class="btn btn-dark btn-lg adopt-submit" type="submit" data-adopt-submit>
+                                <button class="btn btn-dark btn-lg adopt-submit" type="submit" data-adopt-submit data-checkout-open>
                                     <span data-adopt-submit-label>Bayar Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</span>
                                 </button>
+
+                                <dialog
+                                    class="checkout-dialog"
+                                    data-checkout-dialog
+                                    aria-labelledby="checkout-title"
+                                    tabindex="-1"
+                                    @if ($errors->hasAny(['metode', 'bank', 'nomor_rekening', 'dompet', 'nomor_hp']))
+                                        data-checkout-open-on-load
+                                    @endif
+                                >
+                                    <div class="checkout-card">
+                                        <div class="checkout-head">
+                                            <h2 id="checkout-title">Konfirmasi pembayaran</h2>
+                                            <button class="checkout-close" type="button" data-checkout-close aria-label="Tutup konfirmasi pembayaran">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                    <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div class="checkout-summary">
+                                            <div class="checkout-summary-program">
+                                                <span class="checkout-label">Program</span>
+                                                <strong>{{ $proyek->judul }}</strong>
+                                                <span class="checkout-order-meta">
+                                                    Paket <b data-checkout-package>{{ $packages[$selectedPackage]['name'] }}</b>
+                                                    <span aria-hidden="true">&middot;</span>
+                                                    <b data-checkout-trees>{{ number_format($packages[$selectedPackage]['trees'], 0, ',', '.') }} bibit</b>
+                                                </span>
+                                            </div>
+                                            <div class="checkout-total">
+                                                <span class="checkout-label">Total pembayaran</span>
+                                                <strong data-checkout-total>Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</strong>
+                                            </div>
+                                        </div>
+
+                                        <fieldset class="pay-method-group">
+                                            <legend>Metode pembayaran</legend>
+                                            <div class="pay-method-list">
+                                                @foreach (\App\Support\PaymentMethod::channels() as $value => $channel)
+                                                    <label class="pay-method">
+                                                        <input
+                                                            type="radio"
+                                                            name="metode"
+                                                            value="{{ $value }}"
+                                                            @checked(old('metode', 'qris') === $value)
+                                                            required
+                                                        >
+                                                        <span class="pay-method-card">
+                                                            <strong>{{ $channel['label'] }}</strong>
+                                                        </span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                            @error('metode')
+                                                <div class="error">{{ $message }}</div>
+                                            @enderror
+                                        </fieldset>
+
+                                        <div class="pay-detail" data-pay-detail="virtual_account" hidden>
+                                            <div class="pay-fields">
+                                                <label>
+                                                    <span>Bank</span>
+                                                    <select name="bank" data-pay-field disabled required>
+                                                        @foreach (\App\Support\PaymentMethod::banks() as $bank)
+                                                            <option value="{{ $bank }}" @selected(old('bank') === $bank)>{{ $bank }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </label>
+                                                <label>
+                                                    <span>Nomor rekening</span>
+                                                    <input
+                                                        type="text"
+                                                        name="nomor_rekening"
+                                                        value="{{ old('nomor_rekening') }}"
+                                                        inputmode="numeric"
+                                                        autocomplete="off"
+                                                        placeholder="Contoh: 1234567890"
+                                                        minlength="6"
+                                                        maxlength="24"
+                                                        pattern="[0-9]{6,24}"
+                                                        title="Nomor rekening berisi 6 sampai 24 angka."
+                                                        data-pay-field
+                                                        disabled
+                                                        required
+                                                    >
+                                                </label>
+                                            </div>
+                                            @error('bank')
+                                                <div class="error">{{ $message }}</div>
+                                            @enderror
+                                            @error('nomor_rekening')
+                                                <div class="error">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="pay-detail" data-pay-detail="dompet_digital" hidden>
+                                            <div class="pay-fields">
+                                                <label>
+                                                    <span>E-Wallet</span>
+                                                    <select name="dompet" data-pay-field disabled required>
+                                                        @foreach (\App\Support\PaymentMethod::wallets() as $wallet)
+                                                            <option value="{{ $wallet }}" @selected(old('dompet') === $wallet)>{{ $wallet }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </label>
+                                                <label>
+                                                    <span>Nomor HP</span>
+                                                    <input
+                                                        type="tel"
+                                                        name="nomor_hp"
+                                                        value="{{ old('nomor_hp') }}"
+                                                        inputmode="numeric"
+                                                        autocomplete="off"
+                                                        placeholder="Contoh: 081234567890"
+                                                        minlength="9"
+                                                        maxlength="15"
+                                                        pattern="0[0-9]{8,14}"
+                                                        title="Nomor HP diawali 0 dan berisi 9 sampai 15 angka."
+                                                        data-pay-field
+                                                        disabled
+                                                        required
+                                                    >
+                                                </label>
+                                            </div>
+                                            @error('dompet')
+                                                <div class="error">{{ $message }}</div>
+                                            @enderror
+                                            @error('nomor_hp')
+                                                <div class="error">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="checkout-actions">
+                                            <button class="btn" type="button" data-checkout-close>Batal</button>
+                                            <button class="btn btn-dark" type="submit" data-checkout-confirm>
+                                                <span data-checkout-submit-label>Konfirmasi &amp; bayar Rp {{ number_format($packages[$selectedPackage]['price'], 0, ',', '.') }}</span>
+                                            </button>
+                                        </div>
+
+                                        <p class="checkout-note">
+                                            Mode demo: pembayaran disimulasikan, tanpa dana nyata.
+                                        </p>
+                                    </div>
+                                </dialog>
 
                                 <div class="pay-overlay" data-pay-overlay hidden role="status" aria-live="polite" tabindex="-1">
                                     <div class="pay-overlay-card">

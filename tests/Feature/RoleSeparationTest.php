@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\PesananAdopsi;
 use App\Models\Proyek;
 use App\Models\User;
 use Database\Seeders\DemoDataSeeder;
@@ -115,6 +116,7 @@ class RoleSeparationTest extends TestCase
 
         $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
             'paket' => 'starter',
+            'metode' => 'qris',
         ]);
 
         $response->assertRedirect();
@@ -130,11 +132,124 @@ class RoleSeparationTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('pembayaran', [
+            'metode' => 'qris',
+            'penyedia' => 'QRIS Simulasi AlamKu',
             'jumlah' => 50000,
             'status' => 'berhasil',
         ]);
 
         $this->assertSame($before + 2, (int) $project->fresh()->bibit_dipesan);
+    }
+
+    public function test_adoption_accepts_m_banking_and_masks_the_account_number(): void
+    {
+        $donatur = $this->user('donatur@alamku.test');
+
+        $project = Proyek::query()
+            ->where('status', 'aktif')
+            ->whereColumn('bibit_dipesan', '<', 'kuota_bibit')
+            ->firstOrFail();
+
+        $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
+            'paket' => 'starter',
+            'metode' => 'virtual_account',
+            'bank' => 'BCA',
+            'nomor_rekening' => '1234567890',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('payment_success', function (array $success): bool {
+            return $success['payment_method'] === 'M-Banking'
+                && $success['payment_source'] === 'BCA • ••••••7890';
+        });
+
+        $this->assertDatabaseHas('pembayaran', [
+            'metode' => 'virtual_account',
+            'penyedia' => 'BCA',
+            'jumlah' => 50000,
+            'status' => 'berhasil',
+        ]);
+
+        $payment = $donatur->pesananAdopsi()->latest('id')->firstOrFail()->pembayaran()->firstOrFail();
+
+        $this->assertSame('BCA • ••••••7890', $payment->data_respons_gateway['sumber']);
+        $this->assertSame('M-Banking', $payment->data_respons_gateway['channel_label']);
+    }
+
+    public function test_adoption_accepts_e_wallet_and_stores_the_masked_phone(): void
+    {
+        $donatur = $this->user('donatur@alamku.test');
+
+        $project = Proyek::query()
+            ->where('status', 'aktif')
+            ->whereColumn('bibit_dipesan', '<', 'kuota_bibit')
+            ->firstOrFail();
+
+        $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
+            'paket' => 'growth',
+            'metode' => 'dompet_digital',
+            'dompet' => 'GoPay',
+            'nomor_hp' => '081234567890',
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('pembayaran', [
+            'metode' => 'dompet_digital',
+            'penyedia' => 'GoPay',
+            'jumlah' => 100000,
+            'status' => 'berhasil',
+        ]);
+
+        $payment = $donatur->pesananAdopsi()->latest('id')->firstOrFail()->pembayaran()->firstOrFail();
+
+        $this->assertSame('GoPay • 0812••••7890', $payment->data_respons_gateway['sumber']);
+    }
+
+    public function test_adoption_requires_m_banking_account_details(): void
+    {        $donatur = $this->user('donatur@alamku.test');
+
+        $project = Proyek::query()
+            ->where('status', 'aktif')
+            ->whereColumn('bibit_dipesan', '<', 'kuota_bibit')
+            ->firstOrFail();
+
+        $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
+            'paket' => 'starter',
+            'metode' => 'virtual_account',
+        ]);
+
+        $response->assertSessionHasErrors(['bank', 'nomor_rekening']);
+
+        $this->assertSame(0, PesananAdopsi::query()
+            ->where('donatur_id', $donatur->id)
+            ->where('proyek_id', $project->id)
+            ->where('total_bayar', 50000)
+            ->count());
+    }
+
+    public function test_adoption_requires_an_e_wallet_phone_number(): void
+    {
+        $donatur = $this->user('donatur@alamku.test');
+
+        $project = Proyek::query()
+            ->where('status', 'aktif')
+            ->whereColumn('bibit_dipesan', '<', 'kuota_bibit')
+            ->firstOrFail();
+
+        $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
+            'paket' => 'starter',
+            'metode' => 'dompet_digital',
+            'dompet' => 'GoPay',
+        ]);
+
+        $response->assertSessionHasErrors(['nomor_hp']);
+
+        $this->assertSame(0, PesananAdopsi::query()
+            ->where('donatur_id', $donatur->id)
+            ->where('proyek_id', $project->id)
+            ->where('total_bayar', 50000)
+            ->count());
     }
 
     public function test_adoption_requires_a_known_package(): void
@@ -148,6 +263,7 @@ class RoleSeparationTest extends TestCase
 
         $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
             'paket' => 'custom',
+            'metode' => 'qris',
         ]);
 
         $response->assertSessionHasErrors('paket');
@@ -166,6 +282,7 @@ class RoleSeparationTest extends TestCase
 
         $response = $this->actingAs($donatur)->post(route('program.adopt', $project), [
             'paket' => 'starter',
+            'metode' => 'qris',
         ]);
 
         $response->assertSessionHasErrors('paket');

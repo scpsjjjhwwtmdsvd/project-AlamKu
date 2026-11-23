@@ -8,6 +8,10 @@
         $paymentSuccess = session('payment_success');
         $package = \App\Support\AdoptionPackage::match((int) $order->jumlah_bibit, (int) $order->total_bayar);
         $allocation = \App\Support\AdoptionPackage::allocation((int) $order->total_bayar);
+        $payment = $order->pembayaran->sortByDesc('id')->first();
+        $paymentMeta = $payment?->data_respons_gateway ?? [];
+        $paymentMethod = $paymentMeta['channel_label'] ?? \App\Support\PaymentMethod::label($payment?->metode);
+        $paymentSource = $paymentMeta['sumber'] ?? $payment?->penyedia;
     @endphp
 
     <section class="portal-hero portal-hero-slim" data-role="donatur">
@@ -44,6 +48,10 @@
                     <div><span>Kode pesanan</span><strong>{{ $paymentSuccess['kode_pesanan'] }}</strong></div>
                     <div><span>Bibit</span><strong>{{ number_format($paymentSuccess['trees'], 0, ',', '.') }} bibit</strong></div>
                     <div><span>Dibayar</span><strong>Rp {{ number_format($paymentSuccess['total'], 0, ',', '.') }}</strong></div>
+                    <div><span>Metode</span><strong>{{ $paymentSuccess['payment_method'] ?? 'QRIS' }}</strong></div>
+                    @if ($paymentSuccess['payment_source'] ?? null)
+                        <div><span>Sumber</span><strong>{{ $paymentSuccess['payment_source'] }}</strong></div>
+                    @endif
                     <div><span>Status</span><strong>Terkonfirmasi</strong></div>
                 </div>
             </div>
@@ -78,6 +86,10 @@
                         <tr><th>Paket</th><td>{{ $package['name'] ?? 'Adopsi bibit' }}</td></tr>
                         <tr><th>Harga per bibit (setara)</th><td>Rp {{ number_format($order->harga_per_bibit, 0, ',', '.') }}</td></tr>
                         <tr><th>Total bayar</th><td><strong>Rp {{ number_format($order->total_bayar, 0, ',', '.') }}</strong></td></tr>
+                        @if ($paymentMethod)
+                            <tr><th>Metode pembayaran</th><td>{{ $paymentMethod }}</td></tr>
+                            <tr><th>Sumber dana</th><td>{{ $paymentSource ?? '-' }}</td></tr>
+                        @endif
                         <tr><th>Status</th><td><span class="status-badge status-{{ $order->status }}">{{ \Illuminate\Support\Str::headline($order->status) }}</span></td></tr>
                         <tr><th>Batas bayar</th><td>{{ $order->batas_bayar?->format('d M Y H:i') ?? '-' }}</td></tr>
                         <tr><th>Dikonfirmasi pada</th><td>{{ $order->dikonfirmasi_pada?->format('d M Y H:i') ?? '-' }}</td></tr>
