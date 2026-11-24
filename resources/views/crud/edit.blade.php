@@ -25,7 +25,7 @@
         </aside>
 
         <div class="form-card">
-            <form method="POST" action="{{ route($routePrefix.'.update', $item->getKey()) }}">
+            <form method="POST" action="{{ route($routePrefix.'.update', $item->getKey()) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 

@@ -32,7 +32,7 @@ class FotoGeotagController extends CrudController
     {
         return [
             ['label' => 'ID', 'key' => 'id'],
-            ['label' => 'Path', 'key' => 'path'],
+            ['label' => 'Path', 'key' => 'path', 'image' => true],
             ['label' => 'Laporan', 'relation' => 'laporanLapangan', 'label_key' => 'judul'],
             ['label' => 'Pohon', 'relation' => 'pohon', 'label_key' => 'kode_pohon'],
             ['label' => 'Latitude', 'key' => 'latitude'],
@@ -69,9 +69,11 @@ class FotoGeotagController extends CrudController
             ],
             [
                 'name' => 'path',
-                'label' => 'Path Foto',
-                'type' => 'text',
-                'rules' => ['required', 'string', 'max:2048'],
+                'label' => 'Foto Lapangan',
+                'type' => 'file',
+                'required' => true,
+                'rules' => ['nullable', 'image', 'max:4096'],
+                'help' => 'Unggah JPG, PNG, atau WEBP maksimal 4 MB. Nama berkas disimpan otomatis.',
             ],
             [
                 'name' => 'latitude',

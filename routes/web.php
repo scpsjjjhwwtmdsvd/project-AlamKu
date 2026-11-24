@@ -68,10 +68,15 @@ Route::middleware(['auth', 'role:donatur'])->group(function (): void {
 Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->group(function (): void {
     Route::get('/', [MitraController::class, 'dashboard'])->name('dashboard');
     Route::get('/proyek', [MitraController::class, 'projects'])->name('projects');
+    Route::get('/proyek/{proyek}', [MitraController::class, 'showProject'])->whereNumber('proyek')->name('projects.show');
+    Route::put('/proyek/{proyek}/status', [MitraController::class, 'updateProjectStatus'])->whereNumber('proyek')->name('projects.status');
     Route::get('/pohon', [MitraController::class, 'trees'])->name('trees');
+    Route::put('/pohon/{pohon}/status', [MitraController::class, 'updateTreeStatus'])->whereNumber('pohon')->name('trees.status');
     Route::get('/laporan', [MitraController::class, 'reports'])->name('reports');
     Route::get('/laporan/baru', [MitraController::class, 'createReport'])->name('reports.create');
     Route::post('/laporan', [MitraController::class, 'storeReport'])->name('reports.store');
+    Route::get('/laporan/{laporan}/edit', [MitraController::class, 'editReport'])->whereNumber('laporan')->name('reports.edit');
+    Route::put('/laporan/{laporan}', [MitraController::class, 'updateReport'])->whereNumber('laporan')->name('reports.update');
     Route::get('/profil', [MitraController::class, 'profile'])->name('profile');
     Route::put('/profil', [MitraController::class, 'updateProfile'])->name('profile.update');
 });

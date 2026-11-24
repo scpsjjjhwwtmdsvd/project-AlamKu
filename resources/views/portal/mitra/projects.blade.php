@@ -34,7 +34,7 @@
                         ? min(100, (int) round(($project->bibit_dipesan / $project->kuota_bibit) * 100))
                         : 0;
                 @endphp
-                <article class="project-card">
+                <a class="project-card" href="{{ route('mitra.projects.show', $project) }}">
                     <div class="project-media">
                         <img src="{{ $projectImages[$loop->index % count($projectImages)] }}" alt="" loading="lazy">
                     </div>
@@ -55,8 +55,9 @@
                             <div><dt>Biaya / bibit</dt><dd>Rp {{ number_format($project->biaya_per_bibit, 0, ',', '.') }}</dd></div>
                             <div><dt>Kuota</dt><dd>{{ number_format($project->kuota_bibit, 0, ',', '.') }} bibit</dd></div>
                         </dl>
+                        <small class="card-link-hint">Buka detail proses, status, dan dana &rarr;</small>
                     </div>
-                </article>
+                </a>
             @endforeach
         </div>
 

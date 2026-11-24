@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 abstract class CrudController extends Controller
@@ -72,6 +75,10 @@ abstract class CrudController extends Controller
                     fn (array $column): string => $this->columnValue($item, $column),
                     $columns
                 ),
+                'images' => array_map(
+                    fn (array $column): ?string => $this->columnImage($item, $column),
+                    $columns
+                ),
             ];
         }
 
@@ -100,6 +107,8 @@ abstract class CrudController extends Controller
             [],
             $this->validationAttributes($fields)
         );
+
+        $validated = $this->prepareFileFields($request, $validated, $fields);
 
         $class = $this->modelClass();
         $item = new $class();
@@ -151,6 +160,8 @@ abstract class CrudController extends Controller
             [],
             $this->validationAttributes($fields)
         );
+
+        $validated = $this->prepareFileFields($request, $validated, $fields, $item);
 
         $this->fillModel($item, $validated, $fields);
         $this->beforeSave($item);
@@ -339,6 +350,74 @@ abstract class CrudController extends Controller
             'values' => $values,
             'item' => $item,
         ];
+    }
+
+    /**
+     * Simpan unggahan gambar ke public/uploads/{modul} dan pertahankan
+     * berkas lama jika form edit dikirim tanpa memilih berkas baru.
+     *
+     * @param  array<string, mixed>  $validated
+     * @param  array<int, array<string, mixed>>  $fields
+     * @return array<string, mixed>
+     */
+    protected function prepareFileFields(Request $request, array $validated, array $fields, ?Model $item = null): array
+    {
+        foreach ($fields as $field) {
+            if (($field['type'] ?? 'text') !== 'file') {
+                continue;
+            }
+
+            $name = $field['name'];
+
+            if ($request->hasFile($name)) {
+                $directory = public_path('uploads/'.$this->routePrefix());
+                File::ensureDirectoryExists($directory);
+
+                $file = $request->file($name);
+                $filename = Str::random(16).'.'.strtolower($file->getClientOriginalExtension() ?: 'jpg');
+                $file->move($directory, $filename);
+
+                $validated[$name] = 'uploads/'.$this->routePrefix().'/'.$filename;
+
+                continue;
+            }
+
+            $existing = $item?->getAttribute($name);
+
+            if ($existing) {
+                unset($validated[$name]);
+
+                continue;
+            }
+
+            if ($field['required'] ?? false) {
+                throw ValidationException::withMessages([
+                    $name => 'Pilih berkas '.$field['label'].' terlebih dahulu.',
+                ]);
+            }
+        }
+
+        return $validated;
+    }
+
+    /**
+     * @param  array<string, mixed>  $column
+     */
+    protected function columnImage(Model $item, array $column): ?string
+    {
+        if (! ($column['image'] ?? false)) {
+            return null;
+        }
+
+        $value = data_get($item, $column['key'] ?? '');
+
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        return Str::startsWith($value, ['http://', 'https://', '//'])
+            ? $value
+            : asset($value);
     }
 
     /**

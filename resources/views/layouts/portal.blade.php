@@ -38,6 +38,24 @@
         ->take(2)
         ->map(fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
         ->implode('');
+
+    $mitraNotificationCount = 0;
+
+    if ($role === 'mitra' && $currentUser) {
+        $kelompokId = $currentUser->kelompokTani?->id;
+
+        if ($kelompokId) {
+            $projectIds = \App\Models\Proyek::query()
+                ->where('kelompok_tani_id', $kelompokId)
+                ->pluck('id');
+
+            $mitraNotificationCount = \App\Models\PesananAdopsi::query()
+                ->whereIn('proyek_id', $projectIds)
+                ->where('status', 'terkonfirmasi')
+                ->where('dikonfirmasi_pada', '>=', now()->subDays(7))
+                ->count();
+        }
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -74,6 +92,15 @@
             </nav>
 
             <div class="header-actions">
+                @if ($role === 'mitra' && $mitraNotificationCount > 0)
+                    <a class="notif-chip" href="{{ route('mitra.dashboard') }}#notifikasi-adopsi" title="{{ $mitraNotificationCount }} donasi baru dikonfirmasi">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 21a2.2 2.2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <span>{{ $mitraNotificationCount }}</span>
+                    </a>
+                @endif
                 <a class="btn btn-ghost" href="{{ route('home') }}">Situs</a>
                 <details class="user-menu">
                     <summary class="user-chip">

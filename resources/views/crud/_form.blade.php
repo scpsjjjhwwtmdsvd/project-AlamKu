@@ -5,7 +5,8 @@
         $id = 'field-'.$name;
         $value = old($name, $values[$name] ?? null);
         $required = in_array('required', $field['rules'] ?? [], true);
-        $fullWidth = in_array($type, ['textarea'], true);
+        $fullWidth = in_array($type, ['textarea', 'file'], true);
+        $currentFile = $values[$name] ?? null;
     @endphp
 
     <div class="form-group {{ $fullWidth ? 'full' : '' }}">
@@ -38,6 +39,23 @@
                 <input type="checkbox" id="{{ $id }}" name="{{ $name }}" value="1" @checked((bool) $value)>
                 Ya
             </label>
+        @elseif ($type === 'file')
+            @if ($currentFile)
+                <div class="file-preview">
+                    <img
+                        src="{{ \Illuminate\Support\Str::startsWith($currentFile, ['http://', 'https://', '//']) ? $currentFile : asset($currentFile) }}"
+                        alt="Berkas saat ini"
+                        loading="lazy"
+                    >
+                    <span>Berkas saat ini. Pilih berkas baru untuk menggantinya.</span>
+                </div>
+            @endif
+            <input
+                type="file"
+                id="{{ $id }}"
+                name="{{ $name }}"
+                accept="image/*"
+            >
         @else
             <input
                 type="{{ $type }}"

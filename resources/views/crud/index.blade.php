@@ -58,7 +58,13 @@
                         @foreach ($rows as $row)
                             <tr>
                                 @foreach ($row['cells'] as $index => $cell)
-                                    <td data-label="{{ $headers[$index] ?? '' }}">{{ $cell }}</td>
+                                    <td data-label="{{ $headers[$index] ?? '' }}">
+                                        @if ($row['images'][$index] ?? null)
+                                            <img class="row-thumb" src="{{ $row['images'][$index] }}" alt="{{ $headers[$index] ?? 'Foto' }}" loading="lazy">
+                                        @else
+                                            {{ $cell }}
+                                        @endif
+                                    </td>
                                 @endforeach
                                 <td data-label="Aksi">
                                     <div class="actions">

@@ -169,7 +169,7 @@ class DemoDataSeeder extends Seeder
             ]
         );
 
-        PesananAdopsi::updateOrCreate(
+        $orderPending = PesananAdopsi::updateOrCreate(
             ['kode_pesanan' => 'ADP-DEMO-0002'],
             [
                 'donatur_id' => $donatur->id,
@@ -177,9 +177,9 @@ class DemoDataSeeder extends Seeder
                 'jumlah_bibit' => 5,
                 'harga_per_bibit' => 20000,
                 'total_bayar' => 100000,
-                'status' => 'menunggu_pembayaran',
-                'batas_bayar' => now()->addDay(),
-                'dikonfirmasi_pada' => null,
+                'status' => 'terkonfirmasi',
+                'batas_bayar' => now()->subDay(),
+                'dikonfirmasi_pada' => now()->subDay(),
             ]
         );
 
@@ -231,6 +231,19 @@ class DemoDataSeeder extends Seeder
                 'status' => 'berhasil',
                 'dibayar_pada' => now()->subDays(5),
                 'data_respons_gateway' => ['mode' => 'demo', 'reference' => 'DEMO-QRIS-0001'],
+            ]
+        );
+
+        Pembayaran::updateOrCreate(
+            ['referensi_penyedia' => 'DEMO-GOPAY-0002'],
+            [
+                'pesanan_id' => $orderPending->id,
+                'metode' => 'dompet_digital',
+                'penyedia' => 'GoPay',
+                'jumlah' => 100000,
+                'status' => 'berhasil',
+                'dibayar_pada' => now()->subDay(),
+                'data_respons_gateway' => ['mode' => 'demo', 'reference' => 'DEMO-GOPAY-0002'],
             ]
         );
 

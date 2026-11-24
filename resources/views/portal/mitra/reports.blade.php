@@ -35,6 +35,7 @@
                             <th>Kondisi</th>
                             <th>Tanggal</th>
                             <th>Status</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,6 +48,13 @@
                                 <td data-label="Tanggal">{{ $report->tanggal_laporan?->format('d M Y') ?? '-' }}</td>
                                 <td data-label="Status">
                                     <span class="status-badge status-{{ $report->status }}">{{ \Illuminate\Support\Str::headline($report->status) }}</span>
+                                </td>
+                                <td data-label="Aksi">
+                                    @if ($report->status === 'draft')
+                                        <a class="btn btn-sm" href="{{ route('mitra.reports.edit', $report) }}">Ubah kondisi</a>
+                                    @else
+                                        <span class="muted">Terverifikasi</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

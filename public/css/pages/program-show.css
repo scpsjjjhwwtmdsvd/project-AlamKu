@@ -877,6 +877,67 @@
     }
 }
 
+.pay-detail-qris {
+    padding: 12px;
+}
+
+.qris-panel {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.qris-frame {
+    flex: none;
+    width: 132px;
+    padding: 8px;
+    border: 1px solid #e9e3d5;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.qris-code {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.qris-copy strong {
+    display: block;
+    font-size: 12.5px;
+}
+
+.qris-copy p {
+    margin: 4px 0 8px;
+    color: #526257;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.qris-badge {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #e7efdf;
+    color: #2f5138;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+    .qris-panel {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .qris-frame {
+        width: 100%;
+        max-width: 180px;
+    }
+}
+
 @media (max-width: 560px) {
     .program-facts {
         grid-template-columns: 1fr;

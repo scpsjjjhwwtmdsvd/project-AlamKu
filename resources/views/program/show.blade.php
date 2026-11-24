@@ -75,12 +75,37 @@
                     </div>
                     <dl class="detail-list">
                         <div><dt>Area konservasi</dt><dd>{{ $proyek->lokasiHutan?->nama_area_konservasi ?? '-' }}</dd></div>
+                        <div><dt>Alamat</dt><dd>{{ collect([$proyek->kelompokTani?->desa, $proyek->lokasiHutan?->kabupaten, $proyek->lokasiHutan?->provinsi])->filter()->implode(', ') ?: '-' }}</dd></div>
                         <div><dt>Provinsi</dt><dd>{{ $proyek->lokasiHutan?->provinsi ?? '-' }}</dd></div>
                         <div><dt>Kabupaten</dt><dd>{{ $proyek->lokasiHutan?->kabupaten ?? '-' }}</dd></div>
+                        <div><dt>Desa</dt><dd>{{ $proyek->kelompokTani?->desa ?? '-' }}</dd></div>
+                        <div><dt>Koordinat</dt><dd>
+                            @if ($proyek->lokasiHutan?->latitude && $proyek->lokasiHutan?->longitude)
+                                <a href="https://www.google.com/maps?q={{ $proyek->lokasiHutan->latitude }},{{ $proyek->lokasiHutan->longitude }}" target="_blank" rel="noopener">
+                                    {{ $proyek->lokasiHutan->latitude }}, {{ $proyek->lokasiHutan->longitude }}
+                                </a>
+                            @else
+                                -
+                            @endif
+                        </dd></div>
                         <div><dt>Luas area</dt><dd>{{ $proyek->lokasiHutan?->luas_hektar ? $proyek->lokasiHutan->luas_hektar.' ha' : '-' }}</dd></div>
+                        <div><dt>Patokan lokasi</dt><dd>{{ $proyek->lokasiHutan?->deskripsi ?? '-' }}</dd></div>
                         <div><dt>Kelompok tani</dt><dd>{{ $proyek->kelompokTani?->nama_kelompok ?? '-' }}</dd></div>
                         <div><dt>Jenis pohon</dt><dd>{{ $proyek->jenisPohon?->nama_lokal ?? '-' }}</dd></div>
                     </dl>
+                </div>
+
+                <div class="panel care-panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Catatan risiko cuaca.</h2>
+                        </div>
+                    </div>
+                    <p>
+                        Bibit yang gagal tumbuh karena cuaca ekstrem atau bencana alam
+                        tidak dapat direfund. Penggantian hanya diberikan jika terbukti
+                        ada kelalaian perawatan oleh petani mitra.
+                    </p>
                 </div>
             </div>
 
@@ -219,6 +244,19 @@
                                             @enderror
                                         </fieldset>
 
+                                        <div class="pay-detail pay-detail-qris" data-pay-detail="qris">
+                                            <div class="qris-panel">
+                                                <div class="qris-frame">
+                                                    @include('partials.qris-demo')
+                                                </div>
+                                                <div class="qris-copy">
+                                                    <strong>Pindai QRIS untuk membayar</strong>
+                                                    <p>Buka aplikasi bank atau e-wallet, pilih QRIS, lalu pindai kode di samping.</p>
+                                                    <span class="qris-badge">QRIS Simulasi &middot; Mode demo</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="pay-detail" data-pay-detail="virtual_account" hidden>
                                             <div class="pay-fields">
                                                 <label>
@@ -301,7 +339,7 @@
                                         </div>
 
                                         <p class="checkout-note">
-                                            Mode demo: pembayaran disimulasikan, tanpa dana nyata.
+                                            Pembayaran penuh, tanpa DP. Mode demo: pembayaran disimulasikan, tanpa dana nyata.
                                         </p>
                                     </div>
                                 </dialog>
@@ -365,7 +403,7 @@
 
                 <div class="adopt-note">
                     Mode demo: pembayaran disimulasikan dan langsung dikonfirmasi.
-                    Setelah itu bibit dipetakan ke kode pohon dan laporan lapangan.
+                    Pembayaran bersifat penuh (bukan DP). Setelah itu bibit dipetakan ke kode pohon dan laporan lapangan.
                 </div>
 
                 <script type="application/json" data-adopt-data>@json($adoptData)</script>

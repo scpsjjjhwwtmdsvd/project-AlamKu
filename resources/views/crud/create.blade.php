@@ -25,7 +25,7 @@
         </aside>
 
         <div class="form-card">
-            <form method="POST" action="{{ route($routePrefix.'.store') }}">
+            <form method="POST" action="{{ route($routePrefix.'.store') }}" enctype="multipart/form-data">
                 @csrf
 
                 @include('crud._form', ['fields' => $fields, 'values' => $values])

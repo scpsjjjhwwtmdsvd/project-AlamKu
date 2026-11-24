@@ -31,6 +31,7 @@ class KelompokTaniController extends CrudController
         return [
             ['label' => 'ID', 'key' => 'id'],
             ['label' => 'Pengguna', 'relation' => 'pengguna', 'label_key' => 'name'],
+            ['label' => 'Foto', 'key' => 'foto_profil', 'image' => true],
             ['label' => 'Nama Kelompok', 'key' => 'nama_kelompok'],
             ['label' => 'Provinsi', 'key' => 'provinsi'],
             ['label' => 'Kabupaten', 'key' => 'kabupaten'],
@@ -90,10 +91,11 @@ class KelompokTaniController extends CrudController
             ],
             [
                 'name' => 'foto_profil',
-                'label' => 'Foto Profil (path/URL)',
-                'type' => 'text',
+                'label' => 'Foto Profil Kelompok',
+                'type' => 'file',
                 'nullable' => true,
-                'rules' => ['nullable', 'string', 'max:2048'],
+                'rules' => ['nullable', 'image', 'max:4096'],
+                'help' => 'Unggah JPG, PNG, atau WEBP maksimal 4 MB. Foto membantu membedakan kelompok dengan nama serupa.',
             ],
             [
                 'name' => 'deskripsi',

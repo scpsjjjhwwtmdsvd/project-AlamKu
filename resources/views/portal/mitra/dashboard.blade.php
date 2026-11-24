@@ -91,6 +91,103 @@
         </div>
     </section>
 
+    <section class="portal-section" id="notifikasi-adopsi">
+        <div class="portal-section-head">
+            <div>
+                <span class="section-label">Notifikasi</span>
+                <h2>Donasi yang sudah dibayar.</h2>
+            </div>
+            @if ($donationSummary['recent'] > 0)
+                <span class="notif-count">{{ $donationSummary['recent'] }} baru minggu ini</span>
+            @endif
+        </div>
+
+        @if ($donations->isEmpty())
+            <div class="panel empty-state">
+                <strong>Belum ada donasi terkonfirmasi.</strong>
+                <span>Donasi yang dibayar donatur akan muncul di sini secara otomatis.</span>
+            </div>
+        @else
+            <div class="data-card">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Donatur</th>
+                                <th>Proyek</th>
+                                <th>Bibit</th>
+                                <th>Nilai</th>
+                                <th>Dikonfirmasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($donations as $donation)
+                                <tr>
+                                    <td data-label="Donatur">{{ $donation->donatur?->name ?? 'Donatur' }}</td>
+                                    <td data-label="Proyek">{{ $donation->proyek?->judul ?? '-' }}</td>
+                                    <td data-label="Bibit">{{ number_format($donation->jumlah_bibit, 0, ',', '.') }}</td>
+                                    <td data-label="Nilai">Rp {{ number_format($donation->total_bayar, 0, ',', '.') }}</td>
+                                    <td data-label="Dikonfirmasi">{{ $donation->dikonfirmasi_pada?->format('d M Y H:i') ?? '-' }} WIB</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="fund-note">
+                Donasi sudah dikonfirmasi otomatis pada mode demo, jadi Anda tidak perlu menunggu persetujuan admin.
+            </p>
+        @endif
+    </section>
+
+    <section class="portal-section">
+        <div class="portal-section-head">
+            <div>
+                <span class="section-label">Dana</span>
+                <h2>Rincian dana proyek.</h2>
+            </div>
+        </div>
+
+        @if ($funds->isEmpty())
+            <div class="panel empty-state">
+                <strong>Belum ada proyek dengan rencana dana.</strong>
+                <span>Admin akan menambahkan alokasi dana untuk setiap proyek kelompok Anda.</span>
+            </div>
+        @else
+            <div class="data-card">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Proyek</th>
+                                <th>Dana diterima</th>
+                                <th>Rencana</th>
+                                <th>Realisasi</th>
+                                <th>Sisa rencana</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($funds as $fund)
+                                <tr>
+                                    <td data-label="Proyek">
+                                        <a href="{{ route('mitra.projects.show', $fund['project']) }}">{{ $fund['project']->judul }}</a>
+                                    </td>
+                                    <td data-label="Dana diterima">Rp {{ number_format($fund['received'], 0, ',', '.') }}</td>
+                                    <td data-label="Rencana">Rp {{ number_format($fund['planned'], 0, ',', '.') }}</td>
+                                    <td data-label="Realisasi">Rp {{ number_format($fund['realized'], 0, ',', '.') }}</td>
+                                    <td data-label="Sisa rencana">Rp {{ number_format(max(0, $fund['planned'] - $fund['realized']), 0, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="fund-note">
+                Dana diterima dihitung dari donasi terkonfirmasi. Rencana dan realisasi berasal dari alokasi dana yang dicatat admin.
+            </p>
+        @endif
+    </section>
+
     <section class="portal-section">
         <div class="portal-section-head">
             <div>
@@ -112,7 +209,7 @@
                             ? min(100, (int) round(($project->bibit_dipesan / $project->kuota_bibit) * 100))
                             : 0;
                     @endphp
-                    <article class="project-card">
+                    <a class="project-card" href="{{ route('mitra.projects.show', $project) }}">
                         <div class="project-media">
                             <img src="{{ $projectImages[$loop->index % count($projectImages)] }}" alt="" loading="lazy">
                         </div>
@@ -128,7 +225,7 @@
                             </div>
                             <small>{{ number_format($project->bibit_dipesan, 0, ',', '.') }} / {{ number_format($project->kuota_bibit, 0, ',', '.') }} bibit diadopsi</small>
                         </div>
-                    </article>
+                    </a>
                 @endforeach
             </div>
         @endif

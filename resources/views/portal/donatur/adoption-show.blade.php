@@ -14,6 +14,13 @@
         $paymentSource = $paymentMeta['sumber'] ?? $payment?->penyedia;
     @endphp
 
+    @if ($paymentSuccess)
+        <div class="alert success pay-flash" role="status">
+            <strong>Pembayaran berhasil.</strong>
+            Pesanan {{ $paymentSuccess['kode_pesanan'] }} sudah dikonfirmasi otomatis. Rincian ada di bawah.
+        </div>
+    @endif
+
     <section class="portal-hero portal-hero-slim" data-role="donatur">
         <div class="portal-hero-copy">
             <h1>{{ $order->kode_pesanan }}</h1>
@@ -79,7 +86,18 @@
                     <tbody>
                         <tr><th>Kode pesanan</th><td>{{ $order->kode_pesanan }}</td></tr>
                         <tr><th>Program</th><td>{{ $project?->judul ?? '-' }}</td></tr>
-                        <tr><th>Lokasi</th><td>{{ $project?->lokasiHutan?->nama_area_konservasi ?? '-' }}</td></tr>
+                        <tr><th>Area konservasi</th><td>{{ $project?->lokasiHutan?->nama_area_konservasi ?? '-' }}</td></tr>
+                        <tr><th>Alamat</th><td>{{ collect([$project?->kelompokTani?->desa, $project?->lokasiHutan?->kabupaten, $project?->lokasiHutan?->provinsi])->filter()->implode(', ') ?: '-' }}</td></tr>
+                        <tr><th>Koordinat</th><td>
+                            @if ($project?->lokasiHutan?->latitude && $project?->lokasiHutan?->longitude)
+                                <a href="https://www.google.com/maps?q={{ $project->lokasiHutan->latitude }},{{ $project->lokasiHutan->longitude }}" target="_blank" rel="noopener">
+                                    {{ $project->lokasiHutan->latitude }}, {{ $project->lokasiHutan->longitude }}
+                                </a>
+                            @else
+                                -
+                            @endif
+                        </td></tr>
+                        <tr><th>Patokan lokasi</th><td>{{ $project?->lokasiHutan?->deskripsi ?? '-' }}</td></tr>
                         <tr><th>Kelompok tani</th><td>{{ $project?->kelompokTani?->nama_kelompok ?? '-' }}</td></tr>
                         <tr><th>Jenis pohon</th><td>{{ $project?->jenisPohon?->nama_lokal ?? '-' }}</td></tr>
                         <tr><th>Jumlah bibit</th><td>{{ number_format($order->jumlah_bibit, 0, ',', '.') }} bibit</td></tr>
@@ -101,18 +119,20 @@
                 <div class="panel payment-panel">
                     <h2>Selesaikan sebelum {{ $order->batas_bayar?->format('d M Y H:i') ?? 'batas waktu' }}.</h2>
                     <p>
-                        Pembayaran diverifikasi oleh admin AlamKu. Cantumkan kode pesanan
-                        <strong>{{ $order->kode_pesanan }}</strong> pada berita transfer.
+                        Status ini berarti pesanan belum dibayar penuh. AlamKu
+                        <strong>tidak menerapkan DP</strong>: pembayaran harus penuh
+                        sebesar Rp {{ number_format($order->total_bayar, 0, ',', '.') }}.
+                    </p>
+                    <p>
+                        Cantumkan kode pesanan <strong>{{ $order->kode_pesanan }}</strong>
+                        pada berita transfer. Pesanan lama berstatus ini adalah data demo;
+                        hubungi admin bila Anda sudah membayar.
                     </p>
                     <div class="payment-grid">
                         <div><span>Jumlah</span><strong>Rp {{ number_format($order->total_bayar, 0, ',', '.') }}</strong></div>
                         <div><span>Metode</span><strong>Transfer / QRIS</strong></div>
-                        <div><span>Status</span><strong>Menunggu verifikasi</strong></div>
+                        <div><span>Status</span><strong>Menunggu pembayaran penuh</strong></div>
                     </div>
-                    <p class="muted" style="margin-top:16px">
-                        Hubungi admin melalui kanal resmi AlamKu setelah melakukan pembayaran
-                        agar pesanan dapat dikonfirmasi.
-                    </p>
                 </div>
             @endif
 
@@ -131,6 +151,19 @@
                     <p class="fund-note">Alokasi ini menjadi acuan penggunaan dana setelah pembayaran dikonfirmasi.</p>
                 </div>
             @endunless
+
+            <div class="panel care-panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Catatan risiko cuaca.</h2>
+                    </div>
+                </div>
+                <p>
+                    Bibit yang gagal tumbuh karena cuaca ekstrem atau bencana alam
+                    tidak dapat direfund. Penggantian hanya diberikan jika terbukti
+                    ada kelalaian perawatan oleh petani mitra.
+                </p>
+            </div>
 
             <div class="panel">
                 <div class="panel-head">

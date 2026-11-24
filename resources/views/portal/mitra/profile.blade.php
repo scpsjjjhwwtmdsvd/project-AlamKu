@@ -36,7 +36,7 @@
         </aside>
 
         <div class="form-card">
-            <form method="POST" action="{{ route('mitra.profile.update') }}">
+            <form method="POST" action="{{ route('mitra.profile.update') }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -112,8 +112,19 @@
                     </div>
 
                     <div class="form-group full">
-                        <label for="foto_profil">Foto Profil (path/URL)</label>
-                        <input id="foto_profil" type="text" name="foto_profil" value="{{ old('foto_profil', $kelompok?->foto_profil) }}">
+                        <label for="foto_profil">Foto Profil Kelompok</label>
+                        @if ($kelompok?->foto_profil)
+                            <div class="file-preview">
+                                <img
+                                    src="{{ \Illuminate\Support\Str::startsWith($kelompok->foto_profil, ['http://', 'https://', '//']) ? $kelompok->foto_profil : asset($kelompok->foto_profil) }}"
+                                    alt="Foto {{ $kelompok->nama_kelompok }}"
+                                    loading="lazy"
+                                >
+                                <span>Foto saat ini. Pilih berkas baru untuk menggantinya.</span>
+                            </div>
+                        @endif
+                        <input id="foto_profil" type="file" name="foto_profil" accept="image/*">
+                        <small>Unggah JPG, PNG, atau WEBP maksimal 4 MB agar kelompok Anda mudah dikenali admin.</small>
                         @error('foto_profil')
                             <div class="error">{{ $message }}</div>
                         @enderror

@@ -37,7 +37,7 @@ class PembayaranController extends CrudController
             ['label' => 'Referensi', 'key' => 'referensi_penyedia'],
             ['label' => 'Jumlah', 'key' => 'jumlah'],
             ['label' => 'Status', 'key' => 'status', 'humanize' => true],
-            ['label' => 'Dibayar Pada', 'key' => 'dibayar_pada'],
+            ['label' => 'Dibayar Pada (WIB)', 'key' => 'dibayar_pada'],
         ];
     }
 
@@ -99,10 +99,11 @@ class PembayaranController extends CrudController
             ],
             [
                 'name' => 'dibayar_pada',
-                'label' => 'Dibayar Pada',
+                'label' => 'Dibayar Pada (WIB)',
                 'type' => 'datetime-local',
                 'nullable' => true,
                 'rules' => ['nullable', 'date'],
+                'help' => 'Waktu mengikuti zona Asia/Jakarta (WIB).',
             ],
             [
                 'name' => 'data_respons_gateway',
