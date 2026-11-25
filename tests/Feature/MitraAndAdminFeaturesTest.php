@@ -124,7 +124,7 @@ class MitraAndAdminFeaturesTest extends TestCase
         $this->actingAs($donatur)
             ->get(route('program.show', $project))
             ->assertOk()
-            ->assertSee('Pindai QRIS untuk membayar')
+            ->assertSee('Pindai kode QRIS')
             ->assertSee('QRIS Simulasi')
             ->assertSee('Catatan risiko cuaca')
             ->assertSee('tidak dapat direfund')

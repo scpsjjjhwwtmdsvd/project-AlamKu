@@ -117,10 +117,10 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th>Total</th>
-                                    <th>Rp {{ number_format($fund['planned'], 0, ',', '.') }}</th>
-                                    <th>Rp {{ number_format($fund['realized'], 0, ',', '.') }}</th>
-                                    <th>Sisa rencana Rp {{ number_format(max(0, $fund['planned'] - $fund['realized']), 0, ',', '.') }}</th>
+                                    <th data-label="Ringkasan">Total</th>
+                                    <th data-label="Rencana">Rp {{ number_format($fund['planned'], 0, ',', '.') }}</th>
+                                    <th data-label="Realisasi">Rp {{ number_format($fund['realized'], 0, ',', '.') }}</th>
+                                    <th data-label="Sisa rencana">Rp {{ number_format(max(0, $fund['planned'] - $fund['realized']), 0, ',', '.') }}</th>
                                 </tr>
                             </tfoot>
                         </table>
