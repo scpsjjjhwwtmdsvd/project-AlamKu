@@ -32,7 +32,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Konsol Admin') &middot; AlamKu</title>
+    <title>@yield('title', 'Ruang Admin') &middot; AlamKu</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
@@ -43,7 +43,7 @@
 <body class="portal" data-role="admin">
     <header class="site-header">
         <div class="header-inner">
-            <a class="logo" href="{{ route('admin.dashboard') }}" aria-label="AlamKu: Konsol Admin">
+            <a class="logo" href="{{ route('admin.dashboard') }}" aria-label="AlamKu: Ruang Admin">
                 <span class="logo-mark" aria-hidden="true">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                         <path d="M12 21c0-6 1.5-11 8-15-1 8-4 12-8 15Z" fill="currentColor" opacity=".9"/>
@@ -103,7 +103,7 @@
 
     <div class="role-bar role-bar-admin">
         <div class="role-bar-inner">
-            <span class="role-bar-label"><span class="role-dot"></span>Konsol Admin</span>
+            <span class="role-bar-label"><span class="role-dot"></span>Ruang Admin</span>
             <span class="role-bar-tagline">Kelola seluruh data konservasi, donasi, dan verifikasi lapangan.</span>
             <span class="role-bar-date">{{ now()->translatedFormat('d F Y') }}</span>
         </div>
@@ -122,7 +122,7 @@
     </main>
 
     <footer class="site-footer" style="margin-top:0">
-        <div><strong>AlamKu</strong> &middot; Konsol Admin</div>
+        <div><strong>AlamKu</strong> &middot; Ruang Admin</div>
         <div class="footer-links">
             <a href="{{ route('home') }}">Beranda</a>
             <a href="{{ route('admin.dashboard') }}">Dasbor</a>

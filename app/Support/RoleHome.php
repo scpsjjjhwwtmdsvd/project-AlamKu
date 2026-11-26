@@ -22,7 +22,7 @@ final class RoleHome
     public static function label(?string $role): string
     {
         return match ($role) {
-            'admin' => 'Konsol Admin',
+            'admin' => 'Ruang Admin',
             'mitra' => 'Ruang Tani',
             default => 'Ruang Donatur',
         };

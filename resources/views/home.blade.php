@@ -120,7 +120,7 @@
             </article>
 
             <article class="role-portal-card role-portal-admin">
-                <span class="role-chip role-chip-admin">Konsol Admin</span>
+                <span class="role-chip role-chip-admin">Ruang Admin</span>
                 <h3>Verifikasi data.</h3>
                 <p>Satu konsol untuk seluruh modul: program, adopsi, pembayaran, pohon, dan laporan.</p>
                 <ul>

@@ -83,7 +83,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
 
 /*
 |--------------------------------------------------------------------------
-| Konsol Admin
+| Ruang Admin
 |--------------------------------------------------------------------------
 |
 | Seluruh resource CRUD tetap memakai nama route lama (proyek.index, dst.)
