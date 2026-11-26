@@ -202,6 +202,8 @@ class DonaturController extends Controller
                 $proyek->save();
             }
 
+            Pohon::issueForOrder($order);
+
             return $order;
         });
 

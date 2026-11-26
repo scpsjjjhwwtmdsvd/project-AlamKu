@@ -12,19 +12,58 @@ class Pohon extends Model
 
     protected $fillable = [
         'kode_pohon',
+        'pesanan_id',
+        'donatur_id',
         'proyek_id',
         'jenis_pohon_id',
-        'lokasi_hutan_id',
-        'kelompok_tani_id',
-        'tinggi_cm',
-        'diameter_cm',
-        'tanggal_tanam',
-        'status',
+        'status_kesehatan',
         'latitude',
         'longitude',
-        'catatan',
-        'foto',
+        'tanggal_tanam',
     ];
+
+    /**
+     * Terbitkan kode pohon untuk sebuah pesanan adopsi. Setiap bibit yang
+     * diadopsi menghasilkan satu baris pohon agar bisa dilaporkan di lapangan.
+     * Idempoten: hanya menambah sampai jumlahnya sama dengan bibit pesanan.
+     */
+    public static function issueForOrder(PesananAdopsi $order, ?int $count = null): int
+    {
+        $count ??= (int) $order->jumlah_bibit;
+        $existing = static::query()->where('pesanan_id', $order->id)->count();
+        $target = max(0, $count - $existing);
+
+        if ($target === 0) {
+            return 0;
+        }
+
+        $jenisPohonId = $order->proyek?->jenis_pohon_id;
+        $created = 0;
+        $seq = $existing;
+
+        while ($created < $target) {
+            $seq++;
+            $kode = sprintf('ORD-%d-%03d', $order->id, $seq);
+
+            if (static::query()->where('kode_pohon', $kode)->exists()) {
+                continue;
+            }
+
+            $pohon = new static();
+            $pohon->timestamps = false;
+            $pohon->setAttribute('kode_pohon', $kode);
+            $pohon->setAttribute('pesanan_id', $order->id);
+            $pohon->setAttribute('donatur_id', $order->donatur_id);
+            $pohon->setAttribute('proyek_id', $order->proyek_id);
+            $pohon->setAttribute('jenis_pohon_id', $jenisPohonId);
+            $pohon->setAttribute('status_kesehatan', 'belum_ditanam');
+            $pohon->save();
+
+            $created++;
+        }
+
+        return $created;
+    }
 
     protected $casts = [
         'tinggi_cm' => 'integer',
