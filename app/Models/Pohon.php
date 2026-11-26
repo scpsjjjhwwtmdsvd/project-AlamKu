@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Pohon extends Model
 {
@@ -39,13 +40,19 @@ class Pohon extends Model
             return 0;
         }
 
+        $order->loadMissing('proyek.jenisPohon');
+        $namaPohon = $order->proyek?->jenisPohon?->nama_lokal;
+        $prefix = $namaPohon
+            ? Str::upper(preg_replace('/[^A-Za-z0-9]/', '', $namaPohon))
+            : 'PHN';
+
         $jenisPohonId = $order->proyek?->jenis_pohon_id;
         $created = 0;
         $seq = $existing;
 
         while ($created < $target) {
             $seq++;
-            $kode = sprintf('ORD-%d-%03d', $order->id, $seq);
+            $kode = sprintf('%s-%d-%03d', $prefix, $order->id, $seq);
 
             if (static::query()->where('kode_pohon', $kode)->exists()) {
                 continue;
