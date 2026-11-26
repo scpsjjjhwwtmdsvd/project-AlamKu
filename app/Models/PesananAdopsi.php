@@ -47,4 +47,9 @@ class PesananAdopsi extends Model
     {
         return $this->hasMany(Pembayaran::class, 'pesanan_id');
     }
+
+    public function pohon(): HasMany
+    {
+        return $this->hasMany(Pohon::class, 'pesanan_id');
+    }
 }

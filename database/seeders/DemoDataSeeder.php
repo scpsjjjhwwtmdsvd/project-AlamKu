@@ -10,6 +10,7 @@ use App\Models\LaporanLapangan;
 use App\Models\LokasiHutan;
 use App\Models\Pembayaran;
 use App\Models\PesananAdopsi;
+use App\Models\Pohon;
 use App\Models\Proyek;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -183,7 +184,7 @@ class DemoDataSeeder extends Seeder
             ]
         );
 
-        PesananAdopsi::updateOrCreate(
+        $orderLembang = PesananAdopsi::updateOrCreate(
             ['kode_pesanan' => 'ADP-DEMO-0003'],
             [
                 'donatur_id' => $donatur->id,
@@ -219,6 +220,10 @@ class DemoDataSeeder extends Seeder
                     'created_at' => now(),
                 ]
             );
+        }
+
+        foreach ([$orderConfirmed, $orderPending, $orderLembang] as $order) {
+            Pohon::issueForOrder($order);
         }
 
         Pembayaran::updateOrCreate(

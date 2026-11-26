@@ -10,6 +10,8 @@ class Pohon extends Model
 {
     protected $table = 'pohon';
 
+    public const UPDATED_AT = null;
+
     protected $fillable = [
         'kode_pohon',
         'pesanan_id',
@@ -66,12 +68,20 @@ class Pohon extends Model
     }
 
     protected $casts = [
-        'tinggi_cm' => 'integer',
-        'diameter_cm' => 'decimal:2',
         'tanggal_tanam' => 'date',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
     ];
+
+    public function pesanan(): BelongsTo
+    {
+        return $this->belongsTo(PesananAdopsi::class, 'pesanan_id');
+    }
+
+    public function donatur(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'donatur_id');
+    }
 
     public function proyek(): BelongsTo
     {
@@ -81,16 +91,6 @@ class Pohon extends Model
     public function jenisPohon(): BelongsTo
     {
         return $this->belongsTo(JenisPohon::class, 'jenis_pohon_id');
-    }
-
-    public function lokasiHutan(): BelongsTo
-    {
-        return $this->belongsTo(LokasiHutan::class, 'lokasi_hutan_id');
-    }
-
-    public function kelompokTani(): BelongsTo
-    {
-        return $this->belongsTo(KelompokTani::class, 'kelompok_tani_id');
     }
 
     public function laporanLapangan(): HasMany
