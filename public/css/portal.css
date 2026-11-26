@@ -30,6 +30,18 @@ body[data-role="admin"] {
     color: #7a5a17;
 }
 
+.role-chip-donatur {
+    border-color: #c5dceb;
+    background: #e4f0f8;
+    color: #315b78;
+}
+
+.role-chip-mitra {
+    border-color: #c9dec9;
+    background: #e2efe3;
+    color: #315d3d;
+}
+
 .role-bar {
     border-bottom: 1px solid var(--line);
 }
