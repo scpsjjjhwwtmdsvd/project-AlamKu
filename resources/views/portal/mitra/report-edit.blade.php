@@ -46,17 +46,10 @@
 
                     <div class="form-group">
                         <label for="pohon_id">Pohon (opsional)</label>
-                        <input
-                            id="pohon_search"
-                            type="search"
-                            data-tree-search
-                            placeholder="Ketik kode pohon untuk menyaring"
-                            autocomplete="off"
-                        >
                         <select id="pohon_id" name="pohon_id" data-tree-select>
                             <option value="">- Tidak spesifik -</option>
                             @foreach ($trees as $tree)
-                                <option value="{{ $tree->id }}" data-project="{{ $tree->proyek_id }}" data-label="{{ $tree->kode_pohon }}" @selected((string) old('pohon_id', $laporan->pohon_id) === (string) $tree->id)>{{ $tree->kode_pohon }}</option>
+                                <option value="{{ $tree->id }}" data-project="{{ $tree->proyek_id }}" @selected((string) old('pohon_id', $laporan->pohon_id) === (string) $tree->id)>{{ $tree->kode_pohon }}</option>
                             @endforeach
                         </select>
                         <small>Kosongkan jika laporan berlaku untuk seluruh proyek.</small>
@@ -132,7 +125,6 @@
         (() => {
             const projectSelect = document.querySelector('[data-project-select]');
             const treeSelect = document.querySelector('[data-tree-select]');
-            const treeSearch = document.querySelector('[data-tree-search]');
 
             if (!projectSelect || !treeSelect) return;
 
@@ -140,14 +132,10 @@
 
             const sync = () => {
                 const project = projectSelect.value;
-                const keyword = (treeSearch?.value || '').trim().toLowerCase();
                 let selectedStillValid = !treeSelect.value;
 
                 options.forEach((option) => {
-                    const matchesProject = option.dataset.project === project;
-                    const matchesSearch = keyword === ''
-                        || (option.dataset.label || option.textContent).toLowerCase().includes(keyword);
-                    const match = matchesProject && matchesSearch;
+                    const match = option.dataset.project === project;
 
                     option.hidden = !match;
                     option.disabled = !match;
@@ -159,7 +147,6 @@
             };
 
             projectSelect.addEventListener('change', sync);
-            treeSearch?.addEventListener('input', sync);
             sync();
         })();
     </script>
