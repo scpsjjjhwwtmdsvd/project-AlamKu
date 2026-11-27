@@ -9,6 +9,7 @@ use App\Models\PesananAdopsi;
 use App\Models\Pohon;
 use App\Models\Proyek;
 use App\Models\User;
+use App\Support\AdoptionPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -90,17 +91,14 @@ class MitraController extends Controller
             ->orderBy('judul')
             ->get()
             ->map(function (Proyek $project): array {
-                $planned = (int) $project->alokasiDana->sum('rencana');
-                $realized = (int) $project->alokasiDana->sum('realisasi');
+                $fund = $this->fundBreakdown($project);
 
                 return [
                     'project' => $project,
-                    'planned' => $planned,
-                    'realized' => $realized,
-                    'received' => (int) PesananAdopsi::query()
-                        ->where('proyek_id', $project->id)
-                        ->where('status', 'terkonfirmasi')
-                        ->sum('total_bayar'),
+                    'planned' => $fund['planned'],
+                    'realized' => $fund['realized'],
+                    'received' => $fund['received'],
+                    'derived' => $fund['derived'],
                 ];
             });
 
@@ -128,6 +126,60 @@ class MitraController extends Controller
             ->paginate(9);
 
         return view('portal.mitra.projects', compact('kelompok', 'projects'));
+    }
+
+    /**
+     * Rincian dana proyek: pakai alokasi manual admin jika ada, atau turunkan
+     * dari total donasi terkonfirmasi agar proyek tanpa alokasi tidak Rp 0.
+     *
+     * @return array{planned: int, realized: int, received: int, allocations: array<int, array{kategori: string, rencana: int, realisasi: int, keterangan: string|null}>, derived: bool}
+     */
+    private function fundBreakdown(Proyek $project): array
+    {
+        $received = (int) PesananAdopsi::query()
+            ->where('proyek_id', $project->id)
+            ->where('status', 'terkonfirmasi')
+            ->sum('total_bayar');
+
+        $manual = $project->alokasiDana;
+
+        if ($manual->isNotEmpty()) {
+            return [
+                'planned' => (int) $manual->sum('rencana'),
+                'realized' => (int) $manual->sum('realisasi'),
+                'received' => $received,
+                'allocations' => $manual->map(static fn ($row): array => [
+                    'kategori' => $row->kategori,
+                    'rencana' => (int) $row->rencana,
+                    'realisasi' => (int) $row->realisasi,
+                    'keterangan' => $row->keterangan,
+                ])->values()->all(),
+                'derived' => false,
+            ];
+        }
+
+        if ($received > 0) {
+            return [
+                'planned' => $received,
+                'realized' => 0,
+                'received' => $received,
+                'allocations' => array_map(static fn (array $item): array => [
+                    'kategori' => $item['label'],
+                    'rencana' => (int) $item['amount'],
+                    'realisasi' => 0,
+                    'keterangan' => 'Alokasi otomatis dari donasi terkonfirmasi.',
+                ], AdoptionPackage::allocation($received)),
+                'derived' => true,
+            ];
+        }
+
+        return [
+            'planned' => 0,
+            'realized' => 0,
+            'received' => 0,
+            'allocations' => [],
+            'derived' => false,
+        ];
     }
 
     public function showProject(Request $request, Proyek $proyek): View
@@ -160,11 +212,7 @@ class MitraController extends Controller
             ->take(6)
             ->get();
 
-        $fund = [
-            'planned' => (int) $proyek->alokasiDana->sum('rencana'),
-            'realized' => (int) $proyek->alokasiDana->sum('realisasi'),
-            'received' => (int) $donations->sum('total_bayar'),
-        ];
+        $fund = $this->fundBreakdown($proyek);
 
         return view('portal.mitra.project-show', compact('kelompok', 'proyek', 'donations', 'trees', 'reports', 'fund'));
     }
