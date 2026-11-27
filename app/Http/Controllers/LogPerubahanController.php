@@ -45,9 +45,10 @@ class LogPerubahanController extends CrudController
             [
                 'name' => 'pengguna_id',
                 'label' => 'Pengguna',
-                'type' => 'select',
+                'type' => 'search-select',
                 'nullable' => true,
                 'rules' => ['nullable', 'integer', 'exists:pengguna,id'],
+                'placeholder' => 'Ketik nama pengguna...',
                 'options' => fn (): array => $this->userOptions(),
             ],
             [

@@ -38,7 +38,13 @@ class LaporanLapanganController extends CrudController
             ['label' => 'Pelapor', 'relation' => 'pengguna', 'label_key' => 'name'],
             ['label' => 'Kondisi', 'key' => 'kondisi'],
             ['label' => 'Tanggal Laporan', 'key' => 'tanggal_laporan', 'date' => true],
-            ['label' => 'Status', 'key' => 'status', 'humanize' => true],
+            [
+                'label' => 'Status',
+                'key' => 'status',
+                'value' => fn (LaporanLapangan $laporan): string => $laporan->status === 'terverifikasi'
+                    ? 'Sudah Terverifikasi'
+                    : 'Belum Diverifikasi',
+            ],
         ];
     }
 
@@ -69,9 +75,11 @@ class LaporanLapanganController extends CrudController
             [
                 'name' => 'pengguna_id',
                 'label' => 'Pelapor',
-                'type' => 'select',
+                'type' => 'search-select',
                 'nullable' => true,
                 'rules' => ['nullable', 'integer', 'exists:pengguna,id'],
+                'placeholder' => 'Ketik nama pelapor...',
+                'help' => 'Ketik nama atau pilih dari daftar pengguna.',
                 'options' => fn (): array => $this->userOptions(),
             ],
             [
@@ -91,9 +99,14 @@ class LaporanLapanganController extends CrudController
             [
                 'name' => 'kondisi',
                 'label' => 'Kondisi',
-                'type' => 'text',
+                'type' => 'select',
                 'default' => 'sehat',
-                'rules' => ['required', 'string', 'max:255'],
+                'rules' => ['required', 'string', 'in:sehat,perlu_perawatan,kritis'],
+                'options' => [
+                    'sehat' => 'Sehat',
+                    'perlu_perawatan' => 'Perlu Perawatan',
+                    'kritis' => 'Kritis',
+                ],
             ],
             [
                 'name' => 'tinggi_cm',
@@ -118,10 +131,14 @@ class LaporanLapanganController extends CrudController
             ],
             [
                 'name' => 'status',
-                'label' => 'Status',
-                'type' => 'text',
+                'label' => 'Status Verifikasi',
+                'type' => 'select',
                 'default' => 'draft',
-                'rules' => ['required', 'string', 'max:255'],
+                'rules' => ['required', 'string', 'in:draft,terverifikasi'],
+                'options' => [
+                    'draft' => 'Belum Diverifikasi (Draft)',
+                    'terverifikasi' => 'Sudah Terverifikasi',
+                ],
             ],
             [
                 'name' => 'catatan_verifikasi',

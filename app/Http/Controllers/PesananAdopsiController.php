@@ -55,8 +55,9 @@ class PesananAdopsiController extends CrudController
             [
                 'name' => 'donatur_id',
                 'label' => 'Donatur',
-                'type' => 'select',
+                'type' => 'search-select',
                 'rules' => ['required', 'integer', 'exists:pengguna,id'],
+                'placeholder' => 'Ketik nama donatur...',
                 'options' => fn (): array => $this->userOptions(),
             ],
             [

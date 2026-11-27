@@ -46,9 +46,11 @@ class KelompokTaniController extends CrudController
             [
                 'name' => 'pengguna_id',
                 'label' => 'Pengguna',
-                'type' => 'select',
+                'type' => 'search-select',
                 'rules' => ['required', 'integer', 'exists:pengguna,id'],
                 'unique' => true,
+                'placeholder' => 'Ketik nama pengguna...',
+                'help' => 'Ketik nama atau pilih dari daftar pengguna.',
                 'options' => fn (): array => $this->userOptions(),
             ],
             [
