@@ -105,16 +105,6 @@ class PembayaranController extends CrudController
                 'rules' => ['nullable', 'date'],
                 'help' => 'Waktu mengikuti zona Asia/Jakarta (WIB).',
             ],
-            [
-                'name' => 'data_respons_gateway',
-                'label' => 'Data Respons Gateway (JSON)',
-                'type' => 'textarea',
-                'nullable' => true,
-                'json' => true,
-                'rules' => ['nullable', 'json'],
-                'rows' => 5,
-                'placeholder' => '{"status":"success"}',
-            ],
         ];
     }
 }
