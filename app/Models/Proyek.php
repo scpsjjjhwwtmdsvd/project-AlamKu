@@ -17,6 +17,7 @@ class Proyek extends Model
         'kelompok_tani_id',
         'jenis_pohon_id',
         'judul',
+        'kode_prefix',
         'deskripsi',
         'target_ekologi',
         'biaya_per_bibit',
