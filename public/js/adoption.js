@@ -393,6 +393,14 @@
     });
 
     form.addEventListener('input', (event) => {
+        if (event.target === phoneInput) {
+            const digitsOnly = phoneInput.value.replace(/[^0-9]/g, '');
+
+            if (phoneInput.value !== digitsOnly) {
+                phoneInput.value = digitsOnly;
+            }
+        }
+
         if (event.target instanceof Element && event.target.matches('[data-pay-field]')) {
             syncPreview();
         }

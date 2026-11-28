@@ -256,9 +256,12 @@ class DonaturController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('pengguna', 'email')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]+$/'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-        ], [], [
+        ], [
+            'phone.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'phone.max' => 'Nomor telepon maksimal 20 digit.',
+        ], [
             'name' => 'nama lengkap',
             'email' => 'alamat email',
             'phone' => 'nomor telepon',

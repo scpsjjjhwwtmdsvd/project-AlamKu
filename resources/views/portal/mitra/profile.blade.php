@@ -52,7 +52,7 @@
 
                     <div class="form-group">
                         <label for="phone">Nomor Telepon</label>
-                        <input id="phone" type="text" name="phone" value="{{ old('phone', $user->phone) }}">
+                        <input id="phone" type="tel" name="phone" value="{{ old('phone', $user->phone) }}" autocomplete="tel" inputmode="numeric" pattern="[0-9]*" maxlength="20">
                         @error('phone')
                             <div class="error">{{ $message }}</div>
                         @enderror
@@ -166,3 +166,21 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const phone = document.getElementById('phone');
+
+            if (phone) {
+                phone.addEventListener('input', () => {
+                    const digitsOnly = phone.value.replace(/[^0-9]/g, '');
+
+                    if (phone.value !== digitsOnly) {
+                        phone.value = digitsOnly;
+                    }
+                });
+            }
+        })();
+    </script>
+@endpush
