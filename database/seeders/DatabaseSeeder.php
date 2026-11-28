@@ -28,7 +28,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             DemoDataSeeder::class,
-            KarhutlaFundraisingSeeder::class,
+            // KarhutlaFundraisingSeeder sengaja tidak dipanggil: data demo
+            // karhutla sudah dihapus agar spesies hanya Mahoni, Kaliandra,
+            // dan Sengon. File seeder tetap disimpan bila ingin dipakai lagi.
         ]);
     }
 }

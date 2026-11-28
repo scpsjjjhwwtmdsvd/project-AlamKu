@@ -68,7 +68,7 @@
 
                     <div class="form-group">
                         <label for="phone">Nomor Telepon</label>
-                        <input id="phone" type="text" name="phone" value="{{ old('phone') }}" autocomplete="tel">
+                        <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" autocomplete="tel" inputmode="numeric" pattern="[0-9]*" maxlength="20">
                         @error('phone')
                             <div class="error">{{ $message }}</div>
                         @enderror
@@ -217,6 +217,18 @@
 
             roles.forEach((role) => role.addEventListener('change', sync));
             sync();
+
+            const phone = document.getElementById('phone');
+
+            if (phone) {
+                phone.addEventListener('input', () => {
+                    const digitsOnly = phone.value.replace(/[^0-9]/g, '');
+
+                    if (phone.value !== digitsOnly) {
+                        phone.value = digitsOnly;
+                    }
+                });
+            }
 
             document.querySelectorAll('[data-password-toggle]').forEach((button) => {
                 button.addEventListener('click', () => {

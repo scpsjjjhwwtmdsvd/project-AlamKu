@@ -65,7 +65,7 @@ class AuthController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('pengguna', 'email')],
-            'phone' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]+$/'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', Rule::in(['donatur', 'mitra'])],
         ];
@@ -81,7 +81,10 @@ class AuthController extends Controller
             ];
         }
 
-        $data = $request->validate($rules, [], [
+        $data = $request->validate($rules, [
+            'phone.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'phone.max' => 'Nomor telepon maksimal 20 digit.',
+        ], [
             'name' => 'nama lengkap',
             'email' => 'alamat email',
             'phone' => 'nomor telepon',
