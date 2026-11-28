@@ -17,14 +17,18 @@
             <p>Setiap proyek menghubungkan lokasi hutan, jenis pohon, dan donatur yang mendukung.</p>
         </div>
         <div class="hero-side-actions">
-            <a class="btn btn-light" href="{{ route('mitra.reports.create') }}">Buat laporan</a>
+            <a class="btn btn-light" href="{{ route('mitra.projects.create') }}">+ Tambah proyek</a>
+            <a class="btn btn-ghost-light" href="{{ route('mitra.reports.create') }}">Buat laporan</a>
         </div>
     </section>
 
     @if ($projects->isEmpty())
         <div class="panel empty-state">
             <strong>Belum ada proyek.</strong>
-            <span>Admin belum menghubungkan program konservasi ke kelompok {{ $kelompok?->nama_kelompok ?? 'Anda' }}.</span>
+            <span>Ajukan proyek pertama untuk kelompok {{ $kelompok?->nama_kelompok ?? 'Anda' }}, lalu tunggu verifikasi admin.</span>
+            <div style="margin-top:18px">
+                <a class="btn btn-dark" href="{{ route('mitra.projects.create') }}">Tambah proyek pertama</a>
+            </div>
         </div>
     @else
         <div class="project-grid">

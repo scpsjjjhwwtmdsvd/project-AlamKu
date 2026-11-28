@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\FotoGeotag;
+use App\Models\JenisPohon;
 use App\Models\KelompokTani;
 use App\Models\LaporanLapangan;
+use App\Models\LokasiHutan;
 use App\Models\Pohon;
 use App\Models\Proyek;
 use App\Models\User;
@@ -58,6 +60,68 @@ class MitraAndAdminFeaturesTest extends TestCase
             ->assertOk()
             ->assertSee('Pulihkan Hutan Terbakar Sumatra')
             ->assertSee('Pulihkan Hutan Terbakar Sulawesi');
+    }
+
+    public function test_mitra_can_submit_a_new_project_as_draft(): void
+    {
+        $mitra = $this->user('mitra@alamku.test');
+        $kelompok = $mitra->kelompokTani;
+        $location = LokasiHutan::query()->where('kelompok_tani_id', $kelompok->id)->firstOrFail();
+        $species = JenisPohon::query()->firstOrFail();
+
+        $this->actingAs($mitra)
+            ->get(route('mitra.projects.create'))
+            ->assertOk()
+            ->assertSee('Ajukan proyek baru')
+            ->assertSee('Status pengajuan: Draf');
+
+        $response = $this->actingAs($mitra)->post(route('mitra.projects.store'), [
+            'lokasi_hutan_id' => $location->id,
+            'jenis_pohon_id' => $species->id,
+            'judul' => 'Proyek Uji Mitra',
+            'deskripsi' => 'Deskripsi proyek uji.',
+            'target_ekologi' => 'Target ekologi proyek uji.',
+            'biaya_per_bibit' => 25000,
+            'kuota_bibit' => 100,
+            'tanggal_mulai_tanam' => '2026-12-01',
+            'tanggal_selesai_tanam' => '2027-06-01',
+        ]);
+
+        $project = Proyek::query()->where('judul', 'Proyek Uji Mitra')->firstOrFail();
+
+        $response->assertRedirect(route('mitra.projects.show', $project));
+        $this->assertSame('draf', $project->status);
+        $this->assertSame($kelompok->id, $project->kelompok_tani_id);
+        $this->assertSame(0, (int) $project->bibit_dipesan);
+    }
+
+    public function test_mitra_cannot_activate_their_own_draft_project(): void
+    {
+        $mitra = $this->user('mitra@alamku.test');
+        $kelompok = $mitra->kelompokTani;
+        $location = LokasiHutan::query()->where('kelompok_tani_id', $kelompok->id)->firstOrFail();
+        $species = JenisPohon::query()->firstOrFail();
+
+        $project = Proyek::create([
+            'lokasi_hutan_id' => $location->id,
+            'kelompok_tani_id' => $kelompok->id,
+            'jenis_pohon_id' => $species->id,
+            'judul' => 'Draf Tidak Boleh Aktif',
+            'deskripsi' => 'Draf.',
+            'target_ekologi' => 'Target.',
+            'biaya_per_bibit' => 25000,
+            'kuota_bibit' => 10,
+            'bibit_dipesan' => 0,
+            'tanggal_mulai_tanam' => '2026-12-01',
+            'tanggal_selesai_tanam' => '2027-06-01',
+            'status' => 'draf',
+        ]);
+
+        $this->actingAs($mitra)
+            ->put(route('mitra.projects.status', $project), ['status' => 'aktif'])
+            ->assertSessionHas('error');
+
+        $this->assertSame('draf', $project->fresh()->status);
     }
 
     public function test_mitra_can_open_project_detail_and_update_process_status(): void

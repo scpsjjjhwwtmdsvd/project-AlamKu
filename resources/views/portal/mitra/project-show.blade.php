@@ -34,17 +34,26 @@
                         <p>Perbarui status saat penanaman selesai. Status kuota penuh tetap ditentukan oleh sistem adopsi.</p>
                     </div>
                 </div>
-                <form class="inline-status-form" method="POST" action="{{ route('mitra.projects.status', $proyek) }}">
-                    @csrf
-                    @method('PUT')
-                    <select name="status" aria-label="Status proses {{ $proyek->judul }}">
-                        <option value="aktif" @selected($proyek->status === 'aktif')>Aktif — penanaman berjalan</option>
-                        <option value="selesai" @selected($proyek->status === 'selesai')>Selesai — penanaman tuntas</option>
-                    </select>
-                    <button class="btn btn-dark btn-sm" type="submit">Simpan status</button>
-                </form>
-                @if ($proyek->status === 'penuh')
-                    <p class="fund-note">Proyek berstatus penuh karena kuota bibit sudah terisi. Anda tetap dapat menandainya selesai setelah penanaman tuntas.</p>
+                @if ($proyek->status === 'draf')
+                    <p class="fund-note" style="margin-top:0">
+                        Proyek masih berstatus draf. Admin akan memverifikasi kelayakan sebelum proyek diaktifkan
+                        dan dibuka untuk donatur.
+                    </p>
+                @else
+                    <form class="inline-status-form" method="POST" action="{{ route('mitra.projects.status', $proyek) }}">
+                        @csrf
+                        @method('PUT')
+                        <select name="status" aria-label="Status proses {{ $proyek->judul }}">
+                            @if ($proyek->status === 'aktif')
+                                <option value="aktif" @selected($proyek->status === 'aktif')>Aktif - penanaman berjalan</option>
+                            @endif
+                            <option value="selesai" @selected($proyek->status === 'selesai')>Selesai - penanaman tuntas</option>
+                        </select>
+                        <button class="btn btn-dark btn-sm" type="submit">Simpan status</button>
+                    </form>
+                    @if ($proyek->status === 'penuh')
+                        <p class="fund-note">Proyek berstatus penuh karena kuota bibit sudah terisi. Anda tetap dapat menandainya selesai setelah penanaman tuntas.</p>
+                    @endif
                 @endif
                 <div class="progress" aria-hidden="true" style="margin-top:16px">
                     <span @style(['width: ' . $percent . '%'])></span>
