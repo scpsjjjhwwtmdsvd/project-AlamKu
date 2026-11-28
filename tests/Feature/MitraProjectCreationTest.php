@@ -27,6 +27,27 @@ class MitraProjectCreationTest extends TestCase
         return User::query()->where('email', 'mitra@alamku.test')->firstOrFail();
     }
 
+    private function mitraTanpaLokasi(): User
+    {
+        $user = User::create([
+            'name' => 'Mitra Baru',
+            'email' => 'mitra.baru@alamku.test',
+            'password' => 'password',
+            'role' => 'mitra',
+        ]);
+
+        KelompokTani::create([
+            'pengguna_id' => $user->id,
+            'nama_kelompok' => 'Kelompok Baru',
+            'provinsi' => 'Bali',
+            'kabupaten' => 'Gianyar',
+            'desa' => 'Singakerta',
+            'terverifikasi' => false,
+        ]);
+
+        return $user->fresh();
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -62,6 +83,59 @@ class MitraProjectCreationTest extends TestCase
         $response->assertOk();
         $response->assertSee('Ajukan proyek baru.');
         $response->assertSee('Buat Proyek');
+    }
+
+    public function test_mitra_without_location_still_sees_the_project_form(): void
+    {
+        $mitra = $this->mitraTanpaLokasi();
+
+        $response = $this->actingAs($mitra)->get(route('mitra.projects.create'));
+
+        $response->assertOk();
+        $response->assertSee('name="judul"', false);
+        $response->assertSee('name="nama_area_konservasi"', false);
+        $response->assertSee('name="new_location"', false);
+        $response->assertSee('Lengkapi data lokasi baru');
+    }
+
+    public function test_mitra_without_location_can_create_project_with_new_location(): void
+    {
+        $mitra = $this->mitraTanpaLokasi();
+        $kelompok = $mitra->kelompokTani;
+        $species = JenisPohon::query()->firstOrFail();
+
+        $response = $this->actingAs($mitra)->post(route('mitra.projects.store'), [
+            'judul' => 'Proyek Tanpa Lokasi',
+            'jenis_pohon_id' => $species->id,
+            'kode_prefix' => 'UJI-NEW',
+            'deskripsi' => 'Deskripsi proyek.',
+            'target_ekologi' => 'Target ekologi.',
+            'biaya_per_bibit' => 25000,
+            'kuota_bibit' => 50,
+            'tanggal_mulai_tanam' => '2026-12-01',
+            'tanggal_selesai_tanam' => '2026-12-31',
+            'new_location' => '1',
+            'nama_area_konservasi' => 'Hutan Uji Baru',
+            'provinsi' => 'Bali',
+            'kabupaten' => 'Gianyar',
+            'latitude' => '-8.5069000',
+            'longitude' => '115.2625000',
+            'luas_hektar' => '2.5',
+            'deskripsi_lokasi' => 'Lokasi uji.',
+        ]);
+
+        $project = Proyek::query()->where('judul', 'Proyek Tanpa Lokasi')->firstOrFail();
+        $location = LokasiHutan::query()->where('nama_area_konservasi', 'Hutan Uji Baru')->firstOrFail();
+
+        $response->assertRedirect(route('mitra.projects.show', $project));
+
+        $this->assertSame($kelompok->id, $location->kelompok_tani_id);
+        $this->assertSame($location->id, $project->lokasi_hutan_id);
+        $this->assertDatabaseHas('proyek', [
+            'id' => $project->id,
+            'kelompok_tani_id' => $kelompok->id,
+            'status' => 'draf',
+        ]);
     }
 
     public function test_mitra_can_submit_a_new_project_as_draft(): void

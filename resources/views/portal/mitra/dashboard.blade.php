@@ -22,6 +22,7 @@
                 </p>
                 <div class="hero-actions">
                     <a class="btn btn-light" href="{{ route('mitra.projects') }}">Lihat proyek</a>
+                    <a class="btn btn-ghost-light" href="{{ route('mitra.projects.create') }}">Buat proyek</a>
                     <a class="btn btn-ghost-light" href="{{ route('mitra.reports.create') }}">Buat laporan</a>
                 </div>
             @else
@@ -199,7 +200,10 @@
         @if ($projects->isEmpty())
             <div class="panel empty-state">
                 <strong>Belum ada proyek terhubung.</strong>
-                <span>Admin akan menghubungkan program konservasi ke kelompok tani Anda.</span>
+                <span>Buat proyek pertama untuk kelompok tani Anda dan mulai menanam.</span>
+                <div style="margin-top:18px">
+                    <a class="btn btn-dark" href="{{ route('mitra.projects.create') }}">Buat proyek pertama</a>
+                </div>
             </div>
         @else
             <div class="project-grid">

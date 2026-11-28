@@ -168,13 +168,16 @@ class MitraController extends Controller
             ]);
         }
 
-        $data = $request->validate([
+        $hasLocations = LokasiHutan::query()
+            ->where('kelompok_tani_id', $kelompok->id)
+            ->exists();
+
+        // Mitra yang belum punya lokasi hutan tetap bisa membuat proyek dengan
+        // mengisi data lokasi baru langsung di form yang sama.
+        $useNewLocation = $request->boolean('new_location') || ! $hasLocations;
+
+        $rules = [
             'judul' => ['required', 'string', 'max:255'],
-            'lokasi_hutan_id' => [
-                'required',
-                'integer',
-                Rule::exists('lokasi_hutan', 'id')->where('kelompok_tani_id', $kelompok->id),
-            ],
             'jenis_pohon_id' => ['required', 'integer', 'exists:jenis_pohon,id'],
             'kode_prefix' => ['nullable', 'string', 'max:20', 'regex:/^[A-Z0-9-]+$/', Rule::unique('proyek', 'kode_prefix')],
             'deskripsi' => ['required', 'string'],
@@ -183,11 +186,33 @@ class MitraController extends Controller
             'kuota_bibit' => ['required', 'integer', 'min:1'],
             'tanggal_mulai_tanam' => ['required', 'date'],
             'tanggal_selesai_tanam' => ['required', 'date', 'after_or_equal:tanggal_mulai_tanam'],
-        ], [
+        ];
+
+        if ($useNewLocation) {
+            $rules += [
+                'nama_area_konservasi' => ['required', 'string', 'max:255'],
+                'provinsi' => ['required', 'string', 'max:255'],
+                'kabupaten' => ['required', 'string', 'max:255'],
+                'latitude' => ['required', 'numeric', 'between:-90,90'],
+                'longitude' => ['required', 'numeric', 'between:-180,180'],
+                'luas_hektar' => ['nullable', 'numeric', 'min:0'],
+                'deskripsi_lokasi' => ['nullable', 'string'],
+            ];
+        } else {
+            $rules['lokasi_hutan_id'] = [
+                'required',
+                'integer',
+                Rule::exists('lokasi_hutan', 'id')->where('kelompok_tani_id', $kelompok->id),
+            ];
+        }
+
+        $data = $request->validate($rules, [
             'lokasi_hutan_id.exists' => 'Lokasi hutan harus milik kelompok tani Anda.',
             'kode_prefix.regex' => 'Kode prefix hanya boleh berisi huruf kapital, angka, dan strip.',
             'kode_prefix.unique' => 'Kode prefix sudah dipakai proyek lain.',
             'tanggal_selesai_tanam.after_or_equal' => 'Tanggal selesai tanam tidak boleh sebelum tanggal mulai tanam.',
+            'latitude.between' => 'Latitude harus di antara -90 dan 90.',
+            'longitude.between' => 'Longitude harus di antara -180 dan 180.',
         ], [
             'judul' => 'judul proyek',
             'lokasi_hutan_id' => 'lokasi hutan',
@@ -199,23 +224,47 @@ class MitraController extends Controller
             'kuota_bibit' => 'kuota bibit',
             'tanggal_mulai_tanam' => 'tanggal mulai tanam',
             'tanggal_selesai_tanam' => 'tanggal selesai tanam',
+            'nama_area_konservasi' => 'nama area konservasi',
+            'provinsi' => 'provinsi',
+            'kabupaten' => 'kabupaten',
+            'latitude' => 'latitude',
+            'longitude' => 'longitude',
+            'luas_hektar' => 'luas hutan',
+            'deskripsi_lokasi' => 'deskripsi lokasi',
         ]);
 
-        $project = Proyek::create([
-            'lokasi_hutan_id' => $data['lokasi_hutan_id'],
-            'kelompok_tani_id' => $kelompok->id,
-            'jenis_pohon_id' => $data['jenis_pohon_id'],
-            'judul' => $data['judul'],
-            'kode_prefix' => $data['kode_prefix'] ?? null,
-            'deskripsi' => $data['deskripsi'],
-            'target_ekologi' => $data['target_ekologi'],
-            'biaya_per_bibit' => $data['biaya_per_bibit'],
-            'kuota_bibit' => $data['kuota_bibit'],
-            'bibit_dipesan' => 0,
-            'tanggal_mulai_tanam' => $data['tanggal_mulai_tanam'],
-            'tanggal_selesai_tanam' => $data['tanggal_selesai_tanam'],
-            'status' => 'draf',
-        ]);
+        $project = DB::transaction(function () use ($data, $kelompok, $useNewLocation): Proyek {
+            $location = $useNewLocation
+                ? LokasiHutan::create([
+                    'kelompok_tani_id' => $kelompok->id,
+                    'nama_area_konservasi' => $data['nama_area_konservasi'],
+                    'provinsi' => $data['provinsi'],
+                    'kabupaten' => $data['kabupaten'],
+                    'latitude' => $data['latitude'],
+                    'longitude' => $data['longitude'],
+                    'luas_hektar' => $data['luas_hektar'] ?? null,
+                    'deskripsi' => $data['deskripsi_lokasi'] ?? null,
+                ])
+                : LokasiHutan::query()
+                    ->where('kelompok_tani_id', $kelompok->id)
+                    ->findOrFail($data['lokasi_hutan_id']);
+
+            return Proyek::create([
+                'lokasi_hutan_id' => $location->id,
+                'kelompok_tani_id' => $kelompok->id,
+                'jenis_pohon_id' => $data['jenis_pohon_id'],
+                'judul' => $data['judul'],
+                'kode_prefix' => $data['kode_prefix'] ?? null,
+                'deskripsi' => $data['deskripsi'],
+                'target_ekologi' => $data['target_ekologi'],
+                'biaya_per_bibit' => $data['biaya_per_bibit'],
+                'kuota_bibit' => $data['kuota_bibit'],
+                'bibit_dipesan' => 0,
+                'tanggal_mulai_tanam' => $data['tanggal_mulai_tanam'],
+                'tanggal_selesai_tanam' => $data['tanggal_selesai_tanam'],
+                'status' => 'draf',
+            ]);
+        });
 
         return redirect()
             ->route('mitra.projects.show', $project)
