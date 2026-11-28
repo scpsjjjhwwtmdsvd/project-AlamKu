@@ -34,6 +34,7 @@ class ProyekController extends CrudController
         return [
             ['label' => 'ID', 'key' => 'id'],
             ['label' => 'Judul', 'key' => 'judul'],
+            ['label' => 'Kode Prefix', 'key' => 'kode_prefix'],
             ['label' => 'Lokasi', 'relation' => 'lokasiHutan', 'label_key' => 'nama_area_konservasi'],
             ['label' => 'Kelompok Tani', 'relation' => 'kelompokTani', 'label_key' => 'nama_kelompok'],
             ['label' => 'Jenis Pohon', 'relation' => 'jenisPohon', 'label_key' => 'nama_lokal'],
@@ -83,6 +84,14 @@ class ProyekController extends CrudController
                 'label' => 'Judul',
                 'type' => 'text',
                 'rules' => ['required', 'string', 'max:255'],
+            ],
+            [
+                'name' => 'kode_prefix',
+                'label' => 'Kode Prefix Pohon',
+                'type' => 'text',
+                'placeholder' => 'Contoh: CKL-MHN',
+                'help' => 'Dipakai untuk kode pohon otomatis, misalnya CKL-MHN-001.',
+                'rules' => ['nullable', 'string', 'max:20', 'regex:/^[A-Z0-9-]+$/'],
             ],
             [
                 'name' => 'deskripsi',

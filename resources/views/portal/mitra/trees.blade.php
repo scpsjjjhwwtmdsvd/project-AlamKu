@@ -38,7 +38,6 @@
                         <tr>
                             <th>Kode</th>
                             <th>Proyek</th>
-                            <th>Jenis</th>
                             <th>Status</th>
                             <th>Tanggal Tanam</th>
                             <th>Koordinat</th>
@@ -52,7 +51,6 @@
                                 <td data-label="Proyek">
                                     <a href="{{ route('mitra.projects.show', $tree->proyek) }}">{{ $tree->proyek?->judul ?? '-' }}</a>
                                 </td>
-                                <td data-label="Jenis">{{ $tree->jenisPohon?->nama_lokal ?? '-' }}</td>
                                 <td data-label="Status">
                                     <span class="status-badge status-{{ $tree->status_kesehatan }}">{{ \Illuminate\Support\Str::headline($tree->status_kesehatan) }}</span>
                                 </td>

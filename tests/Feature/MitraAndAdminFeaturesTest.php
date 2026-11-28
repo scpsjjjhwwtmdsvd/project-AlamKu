@@ -73,7 +73,7 @@ class MitraAndAdminFeaturesTest extends TestCase
             ->get(route('mitra.projects.create'))
             ->assertOk()
             ->assertSee('Ajukan proyek baru')
-            ->assertSee('Status pengajuan: Draf');
+            ->assertSee('Proyek baru berstatus');
 
         $response = $this->actingAs($mitra)->post(route('mitra.projects.store'), [
             'lokasi_hutan_id' => $location->id,

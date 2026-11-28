@@ -33,26 +33,32 @@ class Pohon extends Model
     public static function issueForOrder(PesananAdopsi $order, ?int $count = null): int
     {
         $count ??= (int) $order->jumlah_bibit;
-        $existing = static::query()->where('pesanan_id', $order->id)->count();
+
+        $order->loadMissing('proyek.lokasiHutan', 'proyek.jenisPohon');
+
+        $proyek = $order->proyek;
+        $prefix = static::prefixForProject($proyek);
+
+        // Hitung hanya pohon milik proyek ini, supaya pohon dari proyek lain
+        // yang tidak sengaja tertaut ke pesanan tidak mengurangi kuota.
+        $existing = static::query()
+            ->where('pesanan_id', $order->id)
+            ->where('proyek_id', $order->proyek_id)
+            ->count();
+
         $target = max(0, $count - $existing);
 
         if ($target === 0) {
             return 0;
         }
 
-        $order->loadMissing('proyek.jenisPohon');
-        $namaPohon = $order->proyek?->jenisPohon?->nama_lokal;
-        $prefix = $namaPohon
-            ? Str::upper(preg_replace('/[^A-Za-z0-9]/', '', $namaPohon))
-            : 'PHN';
-
-        $jenisPohonId = $order->proyek?->jenis_pohon_id;
+        $jenisPohonId = $proyek?->jenis_pohon_id;
+        $seq = static::nextSequence($prefix);
         $created = 0;
-        $seq = $existing;
 
         while ($created < $target) {
             $seq++;
-            $kode = sprintf('%s-%d-%03d', $prefix, $order->id, $seq);
+            $kode = sprintf('%s-%03d', $prefix, $seq);
 
             if (static::query()->where('kode_pohon', $kode)->exists()) {
                 continue;
@@ -72,6 +78,63 @@ class Pohon extends Model
         }
 
         return $created;
+    }
+
+    /**
+     * Prefix kode pohon untuk sebuah proyek, mis. CKL-MHN.
+     * Diambil dari kolom kode_prefix; jika kosong, diturunkan dari
+     * nama lokasi dan nama jenis pohon.
+     */
+    public static function prefixForProject(?Proyek $proyek): string
+    {
+        if (! $proyek) {
+            return 'PHN';
+        }
+
+        if (filled($proyek->kode_prefix)) {
+            return Str::upper($proyek->kode_prefix);
+        }
+
+        $kodeLokasi = static::codeFromName($proyek->lokasiHutan?->nama_area_konservasi);
+        $kodeJenis = static::codeFromName($proyek->jenisPohon?->nama_lokal);
+        $prefix = trim($kodeLokasi.'-'.$kodeJenis, '-');
+
+        return $prefix !== '' ? $prefix : 'PHN';
+    }
+
+    private static function codeFromName(?string $name): string
+    {
+        if (blank($name)) {
+            return '';
+        }
+
+        $words = preg_split('/\s+/', trim($name)) ?: [];
+        $word = end($words) ?: $name;
+        $word = Str::upper(preg_replace('/[^A-Za-z]/', '', $word) ?? '');
+        $consonants = preg_replace('/[AEIOU]/', '', $word) ?? '';
+        $code = $consonants !== '' ? $consonants : $word;
+
+        return substr($code, 0, 3);
+    }
+
+    private static function nextSequence(string $prefix): int
+    {
+        $codes = static::query()
+            ->where('kode_pohon', 'like', $prefix.'-%')
+            ->pluck('kode_pohon');
+
+        $max = 0;
+        $prefixLength = strlen($prefix) + 1;
+
+        foreach ($codes as $code) {
+            $suffix = substr($code, $prefixLength);
+
+            if (ctype_digit($suffix)) {
+                $max = max($max, (int) $suffix);
+            }
+        }
+
+        return $max;
     }
 
     protected $casts = [

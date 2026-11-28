@@ -151,13 +151,12 @@
                     <div class="table-wrap">
                         <table class="data-table">
                             <thead>
-                                <tr><th>Kode</th><th>Jenis</th><th>Status</th><th>Perbarui</th></tr>
+                                <tr><th>Kode</th><th>Status</th><th>Perbarui</th></tr>
                             </thead>
                             <tbody>
                                 @foreach ($trees as $tree)
                                     <tr>
                                         <td data-label="Kode">{{ $tree->kode_pohon }}</td>
-                                        <td data-label="Jenis">{{ $tree->jenisPohon?->nama_lokal ?? '-' }}</td>
                                         <td data-label="Status">
                                             <span class="status-badge status-{{ $tree->status_kesehatan }}">{{ \Illuminate\Support\Str::headline($tree->status_kesehatan) }}</span>
                                         </td>

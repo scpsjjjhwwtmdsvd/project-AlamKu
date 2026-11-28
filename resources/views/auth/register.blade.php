@@ -68,7 +68,7 @@
 
                     <div class="form-group">
                         <label for="phone">Nomor Telepon</label>
-                        <input id="phone" type="text" name="phone" value="{{ old('phone') }}" autocomplete="tel">
+                        <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" autocomplete="tel" inputmode="numeric" pattern="[0-9]*" maxlength="20">
                         @error('phone')
                             <div class="error">{{ $message }}</div>
                         @enderror
@@ -84,7 +84,27 @@
 
                     <div class="form-group">
                         <label for="password">Kata Sandi <span class="req">*</span></label>
-                        <input id="password" type="password" name="password" autocomplete="new-password">
+                        <div class="password-field">
+                            <input id="password" type="password" name="password" autocomplete="new-password">
+                            <button
+                                class="password-toggle"
+                                type="button"
+                                data-password-toggle="password"
+                                aria-label="Tampilkan kata sandi"
+                                aria-pressed="false"
+                            >
+                                <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                                    <line x1="2" y1="2" x2="22" y2="22"/>
+                                </svg>
+                            </button>
+                        </div>
                         <small>Minimal 8 karakter.</small>
                         @error('password')
                             <div class="error">{{ $message }}</div>
@@ -93,7 +113,27 @@
 
                     <div class="form-group">
                         <label for="password_confirmation">Ulangi Kata Sandi <span class="req">*</span></label>
-                        <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password">
+                        <div class="password-field">
+                            <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password">
+                            <button
+                                class="password-toggle"
+                                type="button"
+                                data-password-toggle="password_confirmation"
+                                aria-label="Tampilkan ulangi kata sandi"
+                                aria-pressed="false"
+                            >
+                                <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                                    <line x1="2" y1="2" x2="22" y2="22"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -177,6 +217,30 @@
 
             roles.forEach((role) => role.addEventListener('change', sync));
             sync();
+
+            const phone = document.getElementById('phone');
+
+            if (phone) {
+                phone.addEventListener('input', () => {
+                    const digitsOnly = phone.value.replace(/[^0-9]/g, '');
+
+                    if (phone.value !== digitsOnly) {
+                        phone.value = digitsOnly;
+                    }
+                });
+            }
+
+            document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const input = document.getElementById(button.dataset.passwordToggle);
+                    if (!input) return;
+
+                    const showing = input.type === 'text';
+                    input.type = showing ? 'password' : 'text';
+                    button.setAttribute('aria-pressed', String(!showing));
+                    button.setAttribute('aria-label', showing ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
+                });
+            });
         })();
     </script>
 @endpush

@@ -111,6 +111,7 @@ class DemoDataSeeder extends Seeder
                 'lokasi_hutan_id' => $lokasiCikole->id,
                 'kelompok_tani_id' => $kelompok->id,
                 'jenis_pohon_id' => $mahoni->id,
+                'kode_prefix' => 'CKL-MHN',
                 'deskripsi' => 'Menanam mahoni di area lereng utara untuk memulihkan tutupan hutan dan memperkuat sumber mata air desa.',
                 'target_ekologi' => 'Memulihkan 24 hektare tutupan hutan, menahan erosi lereng, dan menambah serapan karbon tahunan.',
                 'biaya_per_bibit' => 25000,
@@ -128,6 +129,7 @@ class DemoDataSeeder extends Seeder
                 'lokasi_hutan_id' => $lokasiLembang->id,
                 'kelompok_tani_id' => $kelompok->id,
                 'jenis_pohon_id' => $sengon->id,
+                'kode_prefix' => 'LMB-SNG',
                 'deskripsi' => 'Membangun koridor hijau dengan sengon dan tanaman cepat tumbuh untuk menghubungkan dua blok hutan.',
                 'target_ekologi' => 'Menciptakan koridor satwa sepanjang 3 kilometer dan meningkatkan tutupan kanopi blok barat.',
                 'biaya_per_bibit' => 30000,
@@ -145,6 +147,7 @@ class DemoDataSeeder extends Seeder
                 'lokasi_hutan_id' => $lokasiCikole->id,
                 'kelompok_tani_id' => $kelompok->id,
                 'jenis_pohon_id' => $kaliandra->id,
+                'kode_prefix' => 'CKL-KLD',
                 'deskripsi' => 'Menanam kaliandra untuk pakan lebah dan pupuk hijau, mendukung pendapatan tambahan kelompok tani.',
                 'target_ekologi' => 'Meningkatkan pakan lebah lokal, memperbaiki tanah, dan mengurangi ketergantungan pada pupuk kimia.',
                 'biaya_per_bibit' => 20000,
@@ -199,17 +202,17 @@ class DemoDataSeeder extends Seeder
         );
 
         $trees = [
-            ['kode_pohon' => 'CKL-MHN-001', 'proyek_id' => $proyekCikole->id, 'jenis_pohon_id' => $mahoni->id, 'status' => 'tumbuh_baik', 'tanggal' => '2026-03-12', 'lat' => -6.7861000, 'long' => 107.6469000],
-            ['kode_pohon' => 'CKL-MHN-002', 'proyek_id' => $proyekCikole->id, 'jenis_pohon_id' => $mahoni->id, 'status' => 'tumbuh_baik', 'tanggal' => '2026-03-12', 'lat' => -6.7863000, 'long' => 107.6471000],
-            ['kode_pohon' => 'CKL-MHN-003', 'proyek_id' => $proyekCikole->id, 'jenis_pohon_id' => $mahoni->id, 'status' => 'perlu_penyulaman', 'tanggal' => '2026-03-14', 'lat' => -6.7867000, 'long' => 107.6474000],
-            ['kode_pohon' => 'CKL-KLD-001', 'proyek_id' => $proyekKaliandra->id, 'jenis_pohon_id' => $kaliandra->id, 'status' => 'tumbuh_baik', 'tanggal' => '2026-04-18', 'lat' => -6.7859000, 'long' => 107.6466000],
+            ['kode_pohon' => 'CKL-MHN-001', 'proyek_id' => $proyekCikole->id, 'jenis_pohon_id' => $mahoni->id, 'pesanan_id' => $orderConfirmed->id, 'status' => 'tumbuh_baik', 'tanggal' => '2026-03-12', 'lat' => -6.7861000, 'long' => 107.6469000],
+            ['kode_pohon' => 'CKL-MHN-002', 'proyek_id' => $proyekCikole->id, 'jenis_pohon_id' => $mahoni->id, 'pesanan_id' => $orderConfirmed->id, 'status' => 'tumbuh_baik', 'tanggal' => '2026-03-12', 'lat' => -6.7863000, 'long' => 107.6471000],
+            ['kode_pohon' => 'CKL-MHN-003', 'proyek_id' => $proyekCikole->id, 'jenis_pohon_id' => $mahoni->id, 'pesanan_id' => $orderConfirmed->id, 'status' => 'perlu_penyulaman', 'tanggal' => '2026-03-14', 'lat' => -6.7867000, 'long' => 107.6474000],
+            ['kode_pohon' => 'CKL-KLD-001', 'proyek_id' => $proyekKaliandra->id, 'jenis_pohon_id' => $kaliandra->id, 'pesanan_id' => $orderPending->id, 'status' => 'tumbuh_baik', 'tanggal' => '2026-04-18', 'lat' => -6.7859000, 'long' => 107.6466000],
         ];
 
         foreach ($trees as $tree) {
             DB::table('pohon')->updateOrInsert(
                 ['kode_pohon' => $tree['kode_pohon']],
                 [
-                    'pesanan_id' => $orderConfirmed->id,
+                    'pesanan_id' => $tree['pesanan_id'],
                     'donatur_id' => $donatur->id,
                     'proyek_id' => $tree['proyek_id'],
                     'jenis_pohon_id' => $tree['jenis_pohon_id'],
