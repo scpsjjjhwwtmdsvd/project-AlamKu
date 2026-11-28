@@ -40,6 +40,21 @@ class RoleSeparationTest extends TestCase
         $this->get('/admin')->assertRedirect(route('login'));
     }
 
+    public function test_login_with_remember_me_succeeds(): void
+    {
+        $donatur = $this->user('donatur@alamku.test');
+
+        $response = $this->post(route('login.attempt'), [
+            'email' => $donatur->email,
+            'password' => 'password',
+            'remember' => '1',
+        ]);
+
+        $response->assertRedirect(route('akun.dashboard'));
+        $this->assertAuthenticatedAs($donatur);
+        $this->assertNotNull($donatur->fresh()->remember_token);
+    }
+
     public function test_donatur_portal_only_accepts_donatur(): void
     {
         $donatur = $this->user('donatur@alamku.test');
