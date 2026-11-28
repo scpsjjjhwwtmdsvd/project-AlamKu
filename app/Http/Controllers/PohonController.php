@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\JenisPohon;
 use App\Models\PesananAdopsi;
 use App\Models\Pohon;
 use App\Models\Proyek;
@@ -27,7 +26,7 @@ class PohonController extends CrudController
 
     protected function relations(): array
     {
-        return ['proyek', 'jenisPohon'];
+        return ['proyek'];
     }
 
     /**
@@ -38,6 +37,14 @@ class PohonController extends CrudController
     protected function beforeSave(Model $item): void
     {
         $item->timestamps = false;
+
+        // Jenis pohon selalu mengikuti proyek, supaya tidak ada data
+        // pohon yang spesiesnya berbeda dari proyeknya.
+        if ($item->proyek_id) {
+            $item->jenis_pohon_id = Proyek::query()
+                ->whereKey($item->proyek_id)
+                ->value('jenis_pohon_id');
+        }
     }
 
     protected function columns(): array
@@ -47,7 +54,6 @@ class PohonController extends CrudController
             ['label' => 'Kode Pohon', 'key' => 'kode_pohon'],
             ['label' => 'Donatur', 'value' => fn (Pohon $pohon): string => $this->userName($pohon->donatur_id)],
             ['label' => 'Proyek', 'relation' => 'proyek', 'label_key' => 'judul'],
-            ['label' => 'Jenis Pohon', 'relation' => 'jenisPohon', 'label_key' => 'nama_lokal'],
             ['label' => 'Status Kesehatan', 'key' => 'status_kesehatan', 'humanize' => true],
             ['label' => 'Tanggal Tanam', 'key' => 'tanggal_tanam', 'date' => true],
             ['label' => 'Latitude', 'key' => 'latitude'],
@@ -87,20 +93,15 @@ class PohonController extends CrudController
                 'name' => 'proyek_id',
                 'label' => 'Proyek',
                 'type' => 'select',
+                'help' => 'Jenis pohon otomatis mengikuti proyek yang dipilih.',
                 'rules' => ['required', 'integer', 'exists:proyek,id'],
                 'options' => fn (): array => Proyek::query()
+                    ->with('jenisPohon')
                     ->orderBy('judul')
-                    ->pluck('judul', 'id')
-                    ->all(),
-            ],
-            [
-                'name' => 'jenis_pohon_id',
-                'label' => 'Jenis Pohon',
-                'type' => 'select',
-                'rules' => ['required', 'integer', 'exists:jenis_pohon,id'],
-                'options' => fn (): array => JenisPohon::query()
-                    ->orderBy('nama_lokal')
-                    ->pluck('nama_lokal', 'id')
+                    ->get()
+                    ->mapWithKeys(fn (Proyek $proyek): array => [
+                        $proyek->id => $proyek->judul.' — '.($proyek->jenisPohon?->nama_lokal ?? '-'),
+                    ])
                     ->all(),
             ],
             [
