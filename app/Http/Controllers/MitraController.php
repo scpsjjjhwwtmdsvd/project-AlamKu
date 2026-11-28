@@ -320,8 +320,20 @@ class MitraController extends Controller
             403
         );
 
+        if ($proyek->status === 'draf') {
+            return back()->with('error', 'Proyek masih draf dan menunggu verifikasi admin.');
+        }
+
+        if (! in_array($proyek->status, ['aktif', 'penuh', 'selesai'], true)) {
+            return back()->with('error', 'Status proyek ini hanya dapat diubah oleh admin.');
+        }
+
+        $allowedStatuses = $proyek->status === 'penuh'
+            ? ['selesai']
+            : ['aktif', 'selesai'];
+
         $data = $request->validate([
-            'status' => ['required', Rule::in(['aktif', 'selesai'])],
+            'status' => ['required', Rule::in($allowedStatuses)],
         ], [], [
             'status' => 'status proyek',
         ]);

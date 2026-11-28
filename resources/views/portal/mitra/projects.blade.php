@@ -18,6 +18,7 @@
         </div>
         <div class="hero-side-actions">
             <a class="btn btn-light" href="{{ route('mitra.projects.create') }}">Buat proyek</a>
+            <a class="btn btn-ghost-light" href="{{ route('mitra.reports.create') }}">Buat laporan</a>
         </div>
     </section>
 
