@@ -22,14 +22,22 @@ class HomeController extends Controller
         $projects = Proyek::query()
             ->with(['lokasiHutan', 'jenisPohon'])
             ->whereIn('status', ['aktif', 'penuh'])
+            ->where('judul', 'not like', 'Pulihkan Hutan Terbakar%')
             ->latest('id')
             ->take(3)
+            ->get();
+
+        $karhutlaProjects = Proyek::query()
+            ->with(['lokasiHutan', 'jenisPohon'])
+            ->whereIn('status', ['aktif', 'penuh'])
+            ->where('judul', 'like', 'Pulihkan Hutan Terbakar%')
+            ->latest('id')
             ->get();
 
         $totalKuota = (int) Proyek::query()->sum('kuota_bibit');
         $totalAdopsi = (int) Proyek::query()->sum('bibit_dipesan');
         $activeProjects = Proyek::query()->where('status', 'aktif')->count();
 
-        return view('home', compact('stats', 'projects', 'totalKuota', 'totalAdopsi', 'activeProjects'));
+        return view('home', compact('stats', 'projects', 'karhutlaProjects', 'totalKuota', 'totalAdopsi', 'activeProjects'));
     }
 }
