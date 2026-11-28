@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\AlokasiDana;
+use App\Models\JenisPohon;
 use App\Models\KelompokTani;
 use App\Models\LaporanLapangan;
+use App\Models\LokasiHutan;
 use App\Models\PesananAdopsi;
 use App\Models\Pohon;
 use App\Models\Proyek;
@@ -126,6 +128,98 @@ class MitraController extends Controller
             ->paginate(9);
 
         return view('portal.mitra.projects', compact('kelompok', 'projects'));
+    }
+
+    public function createProject(Request $request): View|RedirectResponse
+    {
+        $kelompok = $request->user()->kelompokTani;
+
+        if (! $kelompok) {
+            return redirect()
+                ->route('mitra.profile')
+                ->with('error', 'Lengkapi profil kelompok tani terlebih dahulu sebelum membuat proyek.');
+        }
+
+        $locations = LokasiHutan::query()
+            ->where('kelompok_tani_id', $kelompok->id)
+            ->orderBy('nama_area_konservasi')
+            ->get();
+
+        $species = JenisPohon::query()
+            ->orderBy('nama_lokal')
+            ->get();
+
+        return view('portal.mitra.project-create', compact('kelompok', 'locations', 'species'));
+    }
+
+    public function storeProject(Request $request): RedirectResponse
+    {
+        $kelompok = $request->user()->kelompokTani;
+
+        if (! $kelompok) {
+            return redirect()
+                ->route('mitra.profile')
+                ->with('error', 'Lengkapi profil kelompok tani terlebih dahulu sebelum membuat proyek.');
+        }
+
+        if ($request->filled('kode_prefix')) {
+            $request->merge([
+                'kode_prefix' => Str::upper(trim((string) $request->input('kode_prefix'))),
+            ]);
+        }
+
+        $data = $request->validate([
+            'judul' => ['required', 'string', 'max:255'],
+            'lokasi_hutan_id' => [
+                'required',
+                'integer',
+                Rule::exists('lokasi_hutan', 'id')->where('kelompok_tani_id', $kelompok->id),
+            ],
+            'jenis_pohon_id' => ['required', 'integer', 'exists:jenis_pohon,id'],
+            'kode_prefix' => ['nullable', 'string', 'max:20', 'regex:/^[A-Z0-9-]+$/', Rule::unique('proyek', 'kode_prefix')],
+            'deskripsi' => ['required', 'string'],
+            'target_ekologi' => ['required', 'string'],
+            'biaya_per_bibit' => ['required', 'integer', 'min:0'],
+            'kuota_bibit' => ['required', 'integer', 'min:1'],
+            'tanggal_mulai_tanam' => ['required', 'date'],
+            'tanggal_selesai_tanam' => ['required', 'date', 'after_or_equal:tanggal_mulai_tanam'],
+        ], [
+            'lokasi_hutan_id.exists' => 'Lokasi hutan harus milik kelompok tani Anda.',
+            'kode_prefix.regex' => 'Kode prefix hanya boleh berisi huruf kapital, angka, dan strip.',
+            'kode_prefix.unique' => 'Kode prefix sudah dipakai proyek lain.',
+            'tanggal_selesai_tanam.after_or_equal' => 'Tanggal selesai tanam tidak boleh sebelum tanggal mulai tanam.',
+        ], [
+            'judul' => 'judul proyek',
+            'lokasi_hutan_id' => 'lokasi hutan',
+            'jenis_pohon_id' => 'jenis pohon',
+            'kode_prefix' => 'kode prefix',
+            'deskripsi' => 'deskripsi',
+            'target_ekologi' => 'target ekologi',
+            'biaya_per_bibit' => 'biaya per bibit',
+            'kuota_bibit' => 'kuota bibit',
+            'tanggal_mulai_tanam' => 'tanggal mulai tanam',
+            'tanggal_selesai_tanam' => 'tanggal selesai tanam',
+        ]);
+
+        $project = Proyek::create([
+            'lokasi_hutan_id' => $data['lokasi_hutan_id'],
+            'kelompok_tani_id' => $kelompok->id,
+            'jenis_pohon_id' => $data['jenis_pohon_id'],
+            'judul' => $data['judul'],
+            'kode_prefix' => $data['kode_prefix'] ?? null,
+            'deskripsi' => $data['deskripsi'],
+            'target_ekologi' => $data['target_ekologi'],
+            'biaya_per_bibit' => $data['biaya_per_bibit'],
+            'kuota_bibit' => $data['kuota_bibit'],
+            'bibit_dipesan' => 0,
+            'tanggal_mulai_tanam' => $data['tanggal_mulai_tanam'],
+            'tanggal_selesai_tanam' => $data['tanggal_selesai_tanam'],
+            'status' => 'draf',
+        ]);
+
+        return redirect()
+            ->route('mitra.projects.show', $project)
+            ->with('success', 'Proyek berhasil diajukan dan menunggu verifikasi admin.');
     }
 
     /**
