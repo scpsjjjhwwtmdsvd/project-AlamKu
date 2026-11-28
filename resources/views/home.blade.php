@@ -83,6 +83,53 @@
         </section>
     @endif
 
+    @if ($karhutlaProjects->isNotEmpty())
+        <section class="section" id="karhutla">
+            <div class="section-head">
+                <div>
+                    <span class="section-label">Penggalangan dana karhutla</span>
+                    <h2 class="display">Pulihkan lahan yang <em>terbakar</em>.</h2>
+                </div>
+                <a class="btn btn-dark" href="{{ route('program.index', ['search' => 'Pulihkan Hutan Terbakar']) }}">Lihat semua kampanye</a>
+            </div>
+
+            <p class="lead">
+                Karhutla 2023 menghanguskan 1,16 juta hektare lahan nasional, dan Kalimantan
+                menyumbang sekitar 508.430 hektare. Dukung pemulihan lahan bekas terbakar di
+                Kalimantan, Sumatra, Sulawesi, dan Papua. Data: SiPongi Kemenhut/KLHK, BNPB,
+                BRIN, Greenpeace, dan MapBiomas.
+            </p>
+
+            <div class="project-grid">
+                @foreach ($karhutlaProjects as $project)
+                    @php
+                        $percent = $project->kuota_bibit > 0
+                            ? min(100, (int) round(($project->bibit_dipesan / $project->kuota_bibit) * 100))
+                            : 0;
+                    @endphp
+                    <a class="project-card" href="{{ route('program.show', $project) }}">
+                        <div class="project-media">
+                            <img src="{{ $projectImages[$loop->index % count($projectImages)] }}" alt="" loading="lazy">
+                        </div>
+                        <div class="project-body">
+                            <span class="pill">{{ ucfirst(str_replace('_', ' ', $project->status)) }}</span>
+                            <h3>{{ $project->judul }}</h3>
+                            <p>
+                                {{ $project->lokasiHutan?->nama_area_konservasi ?? 'Lokasi belum diisi' }}
+                                &middot;
+                                {{ $project->jenisPohon?->nama_lokal ?? 'Jenis pohon belum diisi' }}
+                            </p>
+                            <div class="progress" aria-hidden="true">
+                                <span @style(['width: ' . $percent . '%'])></span>
+                            </div>
+                            <small>{{ number_format($project->bibit_dipesan, 0, ',', '.') }} / {{ number_format($project->kuota_bibit, 0, ',', '.') }} bibit diadopsi</small>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <section class="section" id="ruang">
         <div class="section-head">
             <div>

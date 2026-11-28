@@ -9,6 +9,7 @@ use App\Models\Pohon;
 use App\Models\Proyek;
 use App\Models\User;
 use Database\Seeders\DemoDataSeeder;
+use Database\Seeders\KarhutlaFundraisingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
@@ -36,6 +37,27 @@ class MitraAndAdminFeaturesTest extends TestCase
         );
 
         return UploadedFile::fake()->createWithContent('foto.png', $binary);
+    }
+
+    public function test_karhutla_fundraising_programs_appear_on_public_pages(): void
+    {
+        $this->seed(KarhutlaFundraisingSeeder::class);
+
+        $this->assertSame(
+            4,
+            Proyek::query()->where('judul', 'like', 'Pulihkan Hutan Terbakar%')->count()
+        );
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Penggalangan dana karhutla')
+            ->assertSee('Pulihkan Hutan Terbakar Kalimantan')
+            ->assertSee('Pulihkan Hutan Terbakar Papua');
+
+        $this->get('/program')
+            ->assertOk()
+            ->assertSee('Pulihkan Hutan Terbakar Sumatra')
+            ->assertSee('Pulihkan Hutan Terbakar Sulawesi');
     }
 
     public function test_mitra_can_open_project_detail_and_update_process_status(): void

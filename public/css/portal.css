@@ -221,6 +221,7 @@ body[data-role="admin"] {
     justify-content: space-between;
     gap: 28px;
     min-height: 360px;
+    margin-bottom: 20px;
     padding: clamp(26px, 4vw, 46px);
     border-radius: 30px;
     background-position: center;
@@ -323,6 +324,10 @@ body[data-role="admin"] {
     border-radius: 24px;
     background: var(--paper);
     box-shadow: var(--shadow);
+}
+
+.portal-hero + .portal-stats {
+    margin-top: -54px;
 }
 
 .portal-stat {
@@ -930,6 +935,10 @@ body[data-role="admin"] {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         margin-top: 20px;
         padding: 10px;
+    }
+
+    .portal-hero + .portal-stats {
+        margin-top: 0;
     }
 
     .portal-stat {
