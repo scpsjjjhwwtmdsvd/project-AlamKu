@@ -68,6 +68,8 @@ Route::middleware(['auth', 'role:donatur'])->group(function (): void {
 Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->group(function (): void {
     Route::get('/', [MitraController::class, 'dashboard'])->name('dashboard');
     Route::get('/proyek', [MitraController::class, 'projects'])->name('projects');
+    Route::get('/proyek/baru', [MitraController::class, 'createProject'])->name('projects.create');
+    Route::post('/proyek', [MitraController::class, 'storeProject'])->name('projects.store');
     Route::get('/proyek/{proyek}', [MitraController::class, 'showProject'])->whereNumber('proyek')->name('projects.show');
     Route::put('/proyek/{proyek}/status', [MitraController::class, 'updateProjectStatus'])->whereNumber('proyek')->name('projects.status');
     Route::get('/pohon', [MitraController::class, 'trees'])->name('trees');
